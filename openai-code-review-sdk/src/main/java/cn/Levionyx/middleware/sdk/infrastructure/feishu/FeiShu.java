@@ -96,46 +96,45 @@ public class FeiShu {
             body.put("receive_id", chatId);
             body.put("msg_type", "interactive");
 
-            // 构建卡片消息
+            // 构建简化的卡片消息（去掉可能有问题的 header.template）
             JSONObject card = new JSONObject();
+
+            // config
             JSONObject config = new JSONObject();
             config.put("wide_screen_mode", true);
             card.put("config", config);
 
-            // 标题
+            // header - 使用标准格式
             JSONObject header = new JSONObject();
             JSONObject title = new JSONObject();
-            title.put("content", "代码审查通知");
             title.put("tag", "plain_text");
+            title.put("content", "代码审查通知");
             header.put("title", title);
-            header.put("template", "blue");
             card.put("header", header);
 
-            // 内容元素
+            // elements - 使用简化的 div 格式
             java.util.List<JSONObject> elements = new java.util.ArrayList<>();
 
-            // 项目信息
-            elements.add(createFieldElement("项目", project));
-            elements.add(createFieldElement("分支", branch));
-            elements.add(createFieldElement("作者", author));
-            elements.add(createFieldElement("说明", truncate(message, 50)));
+            elements.add(createDivElement("项目: " + sanitize(project)));
+            elements.add(createDivElement("分支: " + sanitize(branch)));
+            elements.add(createDivElement("作者: " + sanitize(author)));
+            elements.add(createDivElement("说明: " + sanitize(truncate(message, 50))));
 
-            // 查看详情链接 - 使用正确的 button 格式
-            JSONObject actionElement = new JSONObject();
-            actionElement.put("tag", "action");
+            // button - 使用简化格式
+            JSONObject buttonWrapper = new JSONObject();
+            buttonWrapper.put("tag", "action");
             java.util.List<JSONObject> actions = new java.util.ArrayList<>();
-            JSONObject action = new JSONObject();
-            action.put("tag", "button");
+            JSONObject button = new JSONObject();
+            button.put("tag", "button");
             JSONObject buttonText = new JSONObject();
             buttonText.put("tag", "plain_text");
             buttonText.put("content", "查看审查详情");
-            action.put("text", buttonText);
-            action.put("type", "primary");
-            // 直接使用原始 URL，不进行额外编码（文件名已在 GitCommand 中清理）
-            action.put("url", logUrl);
-            actions.add(action);
-            actionElement.put("actions", actions);
-            elements.add(actionElement);
+            button.put("text", buttonText);
+            button.put("type", "primary");
+            button.put("url", logUrl);
+            actions.add(button);
+            buttonWrapper.put("actions", actions);
+            elements.add(buttonWrapper);
 
             card.put("elements", elements);
 
@@ -170,6 +169,19 @@ public class FeiShu {
                 conn.disconnect();
             }
         }
+    }
+
+    /**
+     * 创建简单的 div 元素
+     */
+    private JSONObject createDivElement(String content) {
+        JSONObject element = new JSONObject();
+        element.put("tag", "div");
+        JSONObject text = new JSONObject();
+        text.put("tag", "plain_text");
+        text.put("content", content);
+        element.put("text", text);
+        return element;
     }
 
     /**
