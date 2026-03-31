@@ -169,7 +169,15 @@ public class CodeReviewConfigBuilder {
         String modelCode = getEnvOrDefault("CHAT_MODEL", "glm-4-flash");
         config.setChatModel(ChatModel.fromCode(modelCode));
         config.setApiHost(getEnvOrDefault("API_HOST", null));
-        config.setApiKey(getEnv("API_KEY"));
+        // 支持 API_KEY 或 GLM_API_KEY（向后兼容）
+        String apiKey = getEnvOrDefault("API_KEY", null);
+        if (apiKey == null) {
+            apiKey = getEnvOrDefault("GLM_API_KEY", null);
+        }
+        if (apiKey == null) {
+            throw new IllegalArgumentException("环境变量 API_KEY 或 GLM_API_KEY 未配置");
+        }
+        config.setApiKey(apiKey);
 
         // 通知配置
         String channel = getEnvOrDefault("NOTIFICATION_CHANNEL", "feishu");

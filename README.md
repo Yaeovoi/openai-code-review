@@ -153,13 +153,21 @@ new CodeReviewRunner(config).run();
 
 如果使用 JAR 包方式，需要配置以下环境变量：
 
-| 变量名 | 说明 |
-|--------|------|
-| `GITHUB_REVIEW_LOG_URI` | 审查结果存储仓库地址 |
-| `GITHUB_TOKEN` | GitHub 访问令牌 |
-| `API_KEY` | AI 模型 API Key |
-| `CHAT_MODEL` | AI 模型代码 |
-| `NOTIFICATION_CHANNEL` | 通知渠道 |
+| 变量名 | 必填 | 说明 |
+|--------|------|------|
+| `GITHUB_REVIEW_LOG_URI` | 是 | 审查结果存储仓库地址 |
+| `GITHUB_TOKEN` | 是 | GitHub 访问令牌 |
+| `API_KEY` | 是* | AI 模型 API Key |
+| `GLM_API_KEY` | 是* | AI 模型 API Key（向后兼容，与 API_KEY 二选一） |
+| `CHAT_MODEL` | 否 | AI 模型代码，默认 `glm-4-flash` |
+| `NOTIFICATION_CHANNEL` | 否 | 通知渠道，默认 `feishu` |
+| `FEISHU_APP_ID` | 飞书必填 | 飞书应用 ID |
+| `FEISHU_APP_SECRET` | 飞书必填 | 飞书应用密钥 |
+| `FEISHU_CHAT_ID` | 飞书必填 | 飞书群聊 ID |
+| `DINGTALK_WEBHOOK` | 钉钉必填 | 钉钉 Webhook |
+| `WECOM_WEBHOOK` | 企微必填 | 企业微信 Webhook |
+
+> *`API_KEY` 和 `GLM_API_KEY` 二选一，推荐使用 `API_KEY`
 
 ## 前置准备
 
