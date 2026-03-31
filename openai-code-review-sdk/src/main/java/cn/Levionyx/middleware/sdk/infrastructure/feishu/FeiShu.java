@@ -76,6 +76,9 @@ public class FeiShu {
         }
     }
 
+    // 飞书卡片 markdown 元素内容长度限制（约 3000 字符，留余量用 2500）
+    private static final int MARKDOWN_MAX_LENGTH = 2500;
+
     /**
      * 发送消息到群聊
      * 参考: https://open.feishu.cn/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/quick-start/develop-a-card-interactive-bot
@@ -126,14 +129,17 @@ public class FeiShu {
             header.put("padding", "12px 12px 12px 12px");
             card.put("header", header);
 
-            // body.elements - 显示完整的代码审查意见
+            // body.elements - 显示完整的代码审查意见（超长内容拆分）
             java.util.List<JSONObject> elements = new java.util.ArrayList<>();
             elements.add(createMarkdownElement("**项目:** " + sanitize(project)));
             elements.add(createMarkdownElement("**分支:** " + sanitize(branch)));
             elements.add(createMarkdownElement("**作者:** " + sanitize(author)));
             elements.add(createMarkdownElement("---"));  // 分隔线
             elements.add(createMarkdownElement("### 审查意见"));
-            elements.add(createMarkdownElement(sanitize(message)));  // 显示完整的审查内容
+
+            // 将长内容拆分成多个 markdown 元素，绕过飞书长度限制
+            String sanitizedMessage = sanitize(message);
+            addSplitMarkdownElements(elements, sanitizedMessage);
 
             // button
             JSONObject button = new JSONObject();
@@ -203,6 +209,40 @@ public class FeiShu {
         element.put("text_size", "normal_v2");
         element.put("margin", "0px 0px 0px 0px");
         return element;
+    }
+
+    /**
+     * 将长内容拆分成多个 markdown 元素添加到列表中
+     * 飞书卡片每个 markdown 元素有长度限制，超长内容需要拆分
+     */
+    private void addSplitMarkdownElements(java.util.List<JSONObject> elements, String content) {
+        if (content == null || content.isEmpty()) {
+            return;
+        }
+
+        // 如果内容不超过限制，直接添加
+        if (content.length() <= MARKDOWN_MAX_LENGTH) {
+            elements.add(createMarkdownElement(content));
+            return;
+        }
+
+        // 超长内容按段落拆分（优先在换行处拆分，保持内容完整性）
+        int start = 0;
+        while (start < content.length()) {
+            int end = Math.min(start + MARKDOWN_MAX_LENGTH, content.length());
+
+            // 如果不是最后一段，尝试在换行处拆分
+            if (end < content.length()) {
+                int lastNewline = content.lastIndexOf('\n', end);
+                if (lastNewline > start) {
+                    end = lastNewline + 1;  // 包含换行符
+                }
+            }
+
+            String chunk = content.substring(start, end);
+            elements.add(createMarkdownElement(chunk));
+            start = end;
+        }
     }
 
     /**
