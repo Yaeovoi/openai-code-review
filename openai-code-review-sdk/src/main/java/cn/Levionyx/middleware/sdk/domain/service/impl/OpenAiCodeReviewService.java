@@ -29,13 +29,13 @@ public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
     }
 
     @Override
-    protected void pushMessage(String logUrl) throws Exception {
+    protected void pushMessage(String logUrl, String recommend) throws Exception {
         feiShu.sendMessage(
                 logUrl,
                 gitCommand.getProject(),
                 gitCommand.getBranch(),
                 gitCommand.getAuthor(),
-                gitCommand.getMessage()
+                recommend  // 传入代码审查结果
         );
     }
 }

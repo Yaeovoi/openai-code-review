@@ -32,8 +32,8 @@ public abstract class AbstractOpenAiCodeReviewService implements IOpenAiCodeRevi
             String recommend = codeReview(diffCode);
             // 3. 记录评审结果；返回日志地址
             String logUrl = recordCodeReview(recommend);
-            // 4. 发送消息通知；日志地址、通知的内容
-            pushMessage(logUrl);
+            // 4. 发送消息通知；传入审查结果
+            pushMessage(logUrl, recommend);
         } catch (Exception e) {
             logger.error("openai-code-review error", e);
         }
@@ -46,6 +46,6 @@ public abstract class AbstractOpenAiCodeReviewService implements IOpenAiCodeRevi
 
     protected abstract String recordCodeReview(String recommend) throws Exception;
 
-    protected abstract void pushMessage(String logUrl) throws Exception;
+    protected abstract void pushMessage(String logUrl, String recommend) throws Exception;
 
 }
