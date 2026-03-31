@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
@@ -127,7 +128,7 @@ public class FeiShu {
             action.put("tag", "button");
             action.put("text", createTextContent("查看审查详情"));
             action.put("type", "primary");
-            action.put("url", logUrl);
+            action.put("url", encodeUrl(logUrl));
             actions.add(action);
             actionElement.put("actions", actions);
             elements.add(actionElement);
@@ -187,10 +188,39 @@ public class FeiShu {
         field.put("is_short", true);
         JSONObject text = new JSONObject();
         text.put("tag", "lark_md");
-        text.put("content", "**" + label + ":** " + value);
+        text.put("content", "**" + label + ":** " + escapeMarkdown(value));
         field.put("text", text);
         element.put("fields", java.util.Collections.singletonList(field));
         return element;
+    }
+
+    /**
+     * 转义飞书 lark_md 格式中的特殊字符
+     * < 和 > 在 lark_md 中会被解析为 HTML 标签，需要转义
+     */
+    private String escapeMarkdown(String text) {
+        if (text == null) return "";
+        return text.replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    /**
+     * 对 URL 进行编码，处理空格和特殊字符
+     */
+    private String encodeUrl(String url) {
+        if (url == null) return "";
+        try {
+            // 只编码 URL 中的文件名部分（路径最后一段）
+            int lastSlash = url.lastIndexOf('/');
+            if (lastSlash > 0) {
+                String baseUrl = url.substring(0, lastSlash + 1);
+                String fileName = url.substring(lastSlash + 1);
+                return baseUrl + URLEncoder.encode(fileName, StandardCharsets.UTF_8.name()).replace("+", "%20");
+            }
+            return url;
+        } catch (Exception e) {
+            logger.error("URL 编码失败", e);
+            return url;
+        }
     }
 
     private JSONObject createTextContent(String text) {
