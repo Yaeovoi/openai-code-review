@@ -1,0 +1,76 @@
+name: 'Code Review'
+description: 'AI-powered code review with multi-model and multi-channel notification support'
+author: 'Yaeovoi'
+branding:
+  icon: 'code'
+  color: 'blue'
+
+inputs:
+  # GitHub 配置
+  github-token:
+    description: 'GitHub Personal Access Token'
+    required: true
+  review-log-uri:
+    description: 'GitHub repository URL for storing review logs'
+    required: true
+
+  # AI 模型配置
+  chat-model:
+    description: 'AI model to use (glm-4-flash, gpt-4o, deepseek-chat, etc.)'
+    required: false
+    default: 'glm-4-flash'
+  api-key:
+    description: 'API Key for the AI model'
+    required: true
+  api-host:
+    description: 'Custom API host (optional)'
+    required: false
+
+  # 通知配置
+  notification-channel:
+    description: 'Notification channel (feishu, dingtalk, wecom)'
+    required: false
+    default: 'feishu'
+
+  # 飞书配置
+  feishu-app-id:
+    description: 'Feishu App ID'
+    required: false
+  feishu-app-secret:
+    description: 'Feishu App Secret'
+    required: false
+  feishu-chat-id:
+    description: 'Feishu Chat ID'
+    required: false
+
+  # 钉钉配置
+  dingtalk-webhook:
+    description: 'DingTalk Webhook URL'
+    required: false
+
+  # 企业微信配置
+  wecom-webhook:
+    description: 'WeCom Webhook URL'
+    required: false
+
+  # 审查规则
+  custom-prompt:
+    description: 'Custom review prompt'
+    required: false
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    GITHUB_TOKEN: ${{ inputs.github-token }}
+    GITHUB_REVIEW_LOG_URI: ${{ inputs.review-log-uri }}
+    CHAT_MODEL: ${{ inputs.chat-model }}
+    API_KEY: ${{ inputs.api-key }}
+    API_HOST: ${{ inputs.api-host }}
+    NOTIFICATION_CHANNEL: ${{ inputs.notification-channel }}
+    FEISHU_APP_ID: ${{ inputs.feishu-app-id }}
+    FEISHU_APP_SECRET: ${{ inputs.feishu-app-secret }}
+    FEISHU_CHAT_ID: ${{ inputs.feishu-chat-id }}
+    DINGTALK_WEBHOOK: ${{ inputs.dingtalk-webhook }}
+    WECOM_WEBHOOK: ${{ inputs.wecom-webhook }}
+    CUSTOM_PROMPT: ${{ inputs.custom-prompt }}
