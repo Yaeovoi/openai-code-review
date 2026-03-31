@@ -184,23 +184,20 @@ public class FeiShu {
     private JSONObject createFieldElement(String label, String value) {
         JSONObject element = new JSONObject();
         element.put("tag", "div");
-        JSONObject field = new JSONObject();
-        field.put("is_short", true);
         JSONObject text = new JSONObject();
-        text.put("tag", "lark_md");
-        text.put("content", "**" + label + ":** " + escapeMarkdown(value));
-        field.put("text", text);
-        element.put("fields", java.util.Collections.singletonList(field));
+        text.put("tag", "plain_text");
+        text.put("content", label + ": " + sanitize(value));
+        element.put("text", text);
         return element;
     }
 
     /**
-     * 转义飞书 lark_md 格式中的特殊字符
-     * < 和 > 在 lark_md 中会被解析为 HTML 标签，需要转义
+     * 清理文本中的特殊字符，只保留基本内容
      */
-    private String escapeMarkdown(String text) {
+    private String sanitize(String text) {
         if (text == null) return "";
-        return text.replace("<", "&lt;").replace(">", "&gt;");
+        // 移除可能导致问题的特殊字符，只保留基本字符
+        return text.replaceAll("[<>]", "");
     }
 
     /**
