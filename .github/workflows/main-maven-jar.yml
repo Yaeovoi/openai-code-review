@@ -68,3 +68,6 @@ jobs:
           WEIXIN_SECRET: ${{ secrets.WEIXIN_SECRET }}
           WEIXIN_TOUSER: ${{ secrets.WEIXIN_TOUSER }}
           WEIXIN_TEMPLATE_ID: ${{ secrets.WEIXIN_TEMPLATE_ID }}
+          # 阿里云百炼 GLM 配置 「https://bailian.console.aliyun.com/」
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+          GLM_MODEL: ${{ secrets.GLM_MODEL }}

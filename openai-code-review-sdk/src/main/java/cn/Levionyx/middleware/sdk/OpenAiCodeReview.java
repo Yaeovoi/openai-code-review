@@ -3,7 +3,7 @@ package cn.Levionyx.middleware.sdk;
 import cn.Levionyx.middleware.sdk.domain.service.impl.OpenAiCodeReviewService;
 import cn.Levionyx.middleware.sdk.infrastructure.git.GitCommand;
 import cn.Levionyx.middleware.sdk.infrastructure.openai.IOpenAI;
-import cn.Levionyx.middleware.sdk.infrastructure.openai.impl.DeepSeekV3;
+import cn.Levionyx.middleware.sdk.infrastructure.openai.impl.GLM;
 import cn.Levionyx.middleware.sdk.infrastructure.rag.IRAGService;
 import cn.Levionyx.middleware.sdk.infrastructure.rag.impl.RAGServiceImpl;
 import cn.Levionyx.middleware.sdk.infrastructure.weixin.WeiXin;
@@ -14,22 +14,12 @@ public class OpenAiCodeReview {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAiCodeReview.class);
 
-    // 配置配置
-    private String weixin_appid;
-    private String weixin_secret;
-    private String weixin_touser;
-    private String weixin_template_id;
-
-    // Github 配置
-    private String github_review_log_uri;
-    private String github_token;
-
-    // 工程配置 - 自动获取
-    private String github_project;
-    private String github_branch;
-    private String github_author;
+    // 阿里云百炼 API 配置
+    private static final String DEFAULT_GLM_API_HOST = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+    private static final String DEFAULT_GLM_MODEL = "glm-4-flash";
 
     public static void main(String[] args) throws Exception {
+        // Git 操作配置
         GitCommand gitCommand = new GitCommand(
                 getEnv("GITHUB_REVIEW_LOG_URI"),
                 getEnv("GITHUB_TOKEN"),
@@ -39,9 +29,7 @@ public class OpenAiCodeReview {
                 getEnv("COMMIT_MESSAGE")
         );
 
-        /**
-         * 项目：{{repo_name.DATA}} 分支：{{branch_name.DATA}} 作者：{{commit_author.DATA}} 说明：{{commit_message.DATA}}
-         */
+        // 微信配置
         WeiXin weiXin = new WeiXin(
                 getEnv("WEIXIN_APPID"),
                 getEnv("WEIXIN_SECRET"),
@@ -49,19 +37,32 @@ public class OpenAiCodeReview {
                 getEnv("WEIXIN_TEMPLATE_ID")
         );
 
+        // 阿里云百炼 GLM 配置
+        String glmApiKey = getEnv("GLM_API_KEY");
+        String glmApiHost = getEnvOrDefault("GLM_API_HOST", DEFAULT_GLM_API_HOST);
+        String glmModel = getEnvOrDefault("GLM_MODEL", DEFAULT_GLM_MODEL);
 
-        IRAGService ragService = new RAGServiceImpl();
+        IOpenAI openAI = new GLM(glmApiHost, glmApiKey);
+        IRAGService ragService = new RAGServiceImpl(openAI, glmModel);
 
         OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, weiXin, ragService);
         openAiCodeReviewService.exec();
 
-        logger.info("rag-openai-code-review done!");
+        logger.info("glm-code-review done!");
     }
 
     private static String getEnv(String key) {
         String value = System.getenv(key);
         if (null == value || value.isEmpty()) {
-            throw new RuntimeException("value is null");
+            throw new RuntimeException("环境变量 " + key + " 未配置");
+        }
+        return value;
+    }
+
+    private static String getEnvOrDefault(String key, String defaultValue) {
+        String value = System.getenv(key);
+        if (null == value || value.isEmpty()) {
+            return defaultValue;
         }
         return value;
     }
