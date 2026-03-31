@@ -145,8 +145,10 @@ public class FeiShu {
             bodyContent.put("elements", elements);
             card.put("body", bodyContent);
 
-            // 直接将 card 放入 body，不需要额外的 content 包装
-            body.put("card", card);
+            // 将 card 包装在 content 字段中（消息发送 API 要求 content 为字符串）
+            JSONObject contentWrapper = new JSONObject();
+            contentWrapper.put("card", card);
+            body.put("content", contentWrapper.toJSONString());
 
             logger.info("发送飞书消息, 请求体: {}", body.toJSONString());
 
