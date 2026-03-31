@@ -15,7 +15,7 @@ public class OpenAiCodeReview {
     private static final Logger logger = LoggerFactory.getLogger(OpenAiCodeReview.class);
 
     // 阿里云百炼 API 配置
-    private static final String DEFAULT_GLM_API_HOST = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+    private static final String DEFAULT_GLM_API_HOST = "https://coding.dashscope.aliyuncs.com/v1/chat/completions";
     private static final String DEFAULT_GLM_MODEL = "glm-4-flash";
 
     public static void main(String[] args) throws Exception {

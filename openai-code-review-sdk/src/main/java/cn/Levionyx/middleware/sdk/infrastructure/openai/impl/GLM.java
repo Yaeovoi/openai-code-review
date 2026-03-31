@@ -14,12 +14,12 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * 阿里云百炼平台 GLM 模型实现
- * API 地址: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+ * codingplan 计划 API 地址: https://coding.dashscope.aliyuncs.com/v1/chat/completions
  */
 public class GLM implements IOpenAI {
 
-    // 阿里云百炼平台 OpenAI 兼容 API 地址
-    private static final String DEFAULT_API_HOST = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+    // 阿里云百炼 codingplan 专用 API 地址
+    private static final String DEFAULT_API_HOST = "https://coding.dashscope.aliyuncs.com/v1/chat/completions";
 
     private final String apiHost;
     private final String apiKey;
