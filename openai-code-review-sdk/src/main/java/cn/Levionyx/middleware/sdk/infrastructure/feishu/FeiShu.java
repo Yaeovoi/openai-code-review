@@ -78,6 +78,8 @@ public class FeiShu {
 
     /**
      * 发送消息到群聊
+     * 参考: https://open.feishu.cn/document/uAjLw4CM/ukzMukzMukzM/feishu-cards/quick-start/develop-a-card-interactive-bot
+     * 应用 API 格式: content 字段直接是卡片 JSON 字符串，不需要 card 包装
      */
     public void sendMessage(String logUrl, String project, String branch, String author, String message) throws Exception {
         String accessToken = getAccessToken();
@@ -91,16 +93,16 @@ public class FeiShu {
             conn.setRequestProperty("Authorization", "Bearer " + accessToken);
             conn.setDoOutput(true);
 
-            // 构建消息内容 - 按照飞书官方文档示例格式
+            // 构建请求体 - 按照飞书应用发送消息 API 格式
             JSONObject body = new JSONObject();
             body.put("receive_id", chatId);
             body.put("msg_type", "interactive");
 
-            // 构建 card 结构体
+            // 构建卡片 JSON（直接作为 content，不需要 card 包装）
             JSONObject card = new JSONObject();
             card.put("schema", "2.0");
 
-            // config - 添加 style 配置
+            // config
             JSONObject config = new JSONObject();
             config.put("update_multi", true);
             JSONObject style = new JSONObject();
@@ -114,30 +116,24 @@ public class FeiShu {
             config.put("style", style);
             card.put("config", config);
 
-            // header - 添加 padding 和 subtitle
+            // header
             JSONObject header = new JSONObject();
             JSONObject title = new JSONObject();
             title.put("tag", "plain_text");
             title.put("content", "代码审查通知");
             header.put("title", title);
-            JSONObject subtitle = new JSONObject();
-            subtitle.put("tag", "plain_text");
-            subtitle.put("content", "");
-            header.put("subtitle", subtitle);
             header.put("template", "blue");
             header.put("padding", "12px 12px 12px 12px");
             card.put("header", header);
 
-            // body.elements - 添加 padding
+            // body.elements
             java.util.List<JSONObject> elements = new java.util.ArrayList<>();
-
-            // markdown 元素 - 添加 text_align, text_size, margin
             elements.add(createMarkdownElement("**项目:** " + sanitize(project)));
             elements.add(createMarkdownElement("**分支:** " + sanitize(branch)));
             elements.add(createMarkdownElement("**作者:** " + sanitize(author)));
             elements.add(createMarkdownElement("**说明:** " + sanitize(truncate(message, 50))));
 
-            // button - 添加 width, size, margin
+            // button
             JSONObject button = new JSONObject();
             button.put("tag", "button");
             JSONObject buttonText = new JSONObject();
@@ -148,28 +144,22 @@ public class FeiShu {
             button.put("width", "default");
             button.put("size", "medium");
             button.put("margin", "0px 0px 0px 0px");
-            // behaviors - 添加 pc_url, ios_url, android_url
             java.util.List<JSONObject> behaviors = new java.util.ArrayList<>();
             JSONObject openUrl = new JSONObject();
             openUrl.put("type", "open_url");
             openUrl.put("default_url", logUrl);
-            openUrl.put("pc_url", "");
-            openUrl.put("ios_url", "");
-            openUrl.put("android_url", "");
             behaviors.add(openUrl);
             button.put("behaviors", behaviors);
             elements.add(button);
 
-            JSONObject bodyContent = new JSONObject();
-            bodyContent.put("direction", "vertical");
-            bodyContent.put("padding", "12px 12px 12px 12px");
-            bodyContent.put("elements", elements);
-            card.put("body", bodyContent);
+            JSONObject cardBody = new JSONObject();
+            cardBody.put("direction", "vertical");
+            cardBody.put("padding", "12px 12px 12px 12px");
+            cardBody.put("elements", elements);
+            card.put("body", cardBody);
 
-            // 将 card 包装在 content 字段中（消息发送 API 要求 content 为字符串）
-            JSONObject contentWrapper = new JSONObject();
-            contentWrapper.put("card", card);
-            body.put("content", contentWrapper.toJSONString());
+            // 应用 API: content 直接是卡片 JSON 字符串
+            body.put("content", card.toJSONString());
 
             logger.info("发送飞书消息, 请求体: {}", body.toJSONString());
 
