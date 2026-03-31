@@ -1,12 +1,12 @@
 package cn.Levionyx.middleware.sdk;
 
 import cn.Levionyx.middleware.sdk.domain.service.impl.OpenAiCodeReviewService;
+import cn.Levionyx.middleware.sdk.infrastructure.feishu.FeiShu;
 import cn.Levionyx.middleware.sdk.infrastructure.git.GitCommand;
 import cn.Levionyx.middleware.sdk.infrastructure.openai.IOpenAI;
 import cn.Levionyx.middleware.sdk.infrastructure.openai.impl.GLM;
 import cn.Levionyx.middleware.sdk.infrastructure.rag.IRAGService;
 import cn.Levionyx.middleware.sdk.infrastructure.rag.impl.RAGServiceImpl;
-import cn.Levionyx.middleware.sdk.infrastructure.weixin.WeiXin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +29,11 @@ public class OpenAiCodeReview {
                 getEnv("COMMIT_MESSAGE")
         );
 
-        // 微信配置
-        WeiXin weiXin = new WeiXin(
-                getEnv("WEIXIN_APPID"),
-                getEnv("WEIXIN_SECRET"),
-                getEnv("WEIXIN_TOUSER"),
-                getEnv("WEIXIN_TEMPLATE_ID")
+        // 飞书配置
+        FeiShu feiShu = new FeiShu(
+                getEnv("FEISHU_APP_ID"),
+                getEnv("FEISHU_APP_SECRET"),
+                getEnv("FEISHU_CHAT_ID")
         );
 
         // 阿里云百炼 GLM 配置
@@ -45,7 +44,7 @@ public class OpenAiCodeReview {
         IOpenAI openAI = new GLM(glmApiHost, glmApiKey);
         IRAGService ragService = new RAGServiceImpl(openAI, glmModel);
 
-        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, weiXin, ragService);
+        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, feiShu, ragService);
         openAiCodeReviewService.exec();
 
         logger.info("glm-code-review done!");

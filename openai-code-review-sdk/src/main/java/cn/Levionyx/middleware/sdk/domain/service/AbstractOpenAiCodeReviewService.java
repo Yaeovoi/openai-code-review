@@ -1,9 +1,8 @@
 package cn.Levionyx.middleware.sdk.domain.service;
 
+import cn.Levionyx.middleware.sdk.infrastructure.feishu.FeiShu;
 import cn.Levionyx.middleware.sdk.infrastructure.git.GitCommand;
-import cn.Levionyx.middleware.sdk.infrastructure.openai.IOpenAI;
 import cn.Levionyx.middleware.sdk.infrastructure.rag.IRAGService;
-import cn.Levionyx.middleware.sdk.infrastructure.weixin.WeiXin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +14,12 @@ public abstract class AbstractOpenAiCodeReviewService implements IOpenAiCodeRevi
     private final Logger logger = LoggerFactory.getLogger(AbstractOpenAiCodeReviewService.class);
 
     protected final GitCommand gitCommand;
-    protected final WeiXin weiXin;
+    protected final FeiShu feiShu;
     protected final IRAGService ragService;
 
-    public AbstractOpenAiCodeReviewService(GitCommand gitCommand, WeiXin weiXin, IRAGService ragService) {
+    public AbstractOpenAiCodeReviewService(GitCommand gitCommand, FeiShu feiShu, IRAGService ragService) {
         this.gitCommand = gitCommand;
-        this.weiXin = weiXin;
+        this.feiShu = feiShu;
         this.ragService = ragService;
     }
 

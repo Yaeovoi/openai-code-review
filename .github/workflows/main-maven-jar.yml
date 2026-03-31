@@ -51,7 +51,7 @@ jobs:
           echo "Repository name is ${{ env.REPO_NAME }}"
           echo "Branch name is ${{ env.BRANCH_NAME }}"
           echo "Commit author is ${{ env.COMMIT_AUTHOR }}"
-          echo "Commit message is ${{ env.COMMIT_MESSAGE }}" 
+          echo "Commit message is ${{ env.COMMIT_MESSAGE }}"
 
       - name: Run Code Review
         run: java -jar ./libs/openai-code-review-sdk-1.0.jar
@@ -63,11 +63,10 @@ jobs:
           COMMIT_BRANCH: ${{ env.BRANCH_NAME }}
           COMMIT_AUTHOR: ${{ env.COMMIT_AUTHOR }}
           COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
-          # 微信配置 「https://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&t=sandbox/index」
-          WEIXIN_APPID: ${{ secrets.WEIXIN_APPID }}
-          WEIXIN_SECRET: ${{ secrets.WEIXIN_SECRET }}
-          WEIXIN_TOUSER: ${{ secrets.WEIXIN_TOUSER }}
-          WEIXIN_TEMPLATE_ID: ${{ secrets.WEIXIN_TEMPLATE_ID }}
+          # 飞书配置 「https://open.feishu.cn/app」
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+          FEISHU_CHAT_ID: ${{ secrets.FEISHU_CHAT_ID }}
           # 阿里云百炼 GLM 配置 「https://bailian.console.aliyun.com/」
           GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
           GLM_MODEL: ${{ secrets.GLM_MODEL }}
