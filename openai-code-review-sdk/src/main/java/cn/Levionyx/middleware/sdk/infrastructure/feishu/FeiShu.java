@@ -120,15 +120,19 @@ public class FeiShu {
             elements.add(createFieldElement("作者", author));
             elements.add(createFieldElement("说明", truncate(message, 50)));
 
-            // 查看详情链接
+            // 查看详情链接 - 使用正确的 button 格式
             JSONObject actionElement = new JSONObject();
             actionElement.put("tag", "action");
             java.util.List<JSONObject> actions = new java.util.ArrayList<>();
             JSONObject action = new JSONObject();
             action.put("tag", "button");
-            action.put("text", createTextContent("查看审查详情"));
+            JSONObject buttonText = new JSONObject();
+            buttonText.put("tag", "plain_text");
+            buttonText.put("content", "查看审查详情");
+            action.put("text", buttonText);
             action.put("type", "primary");
-            action.put("url", encodeUrl(logUrl));
+            // 直接使用原始 URL，不进行额外编码（文件名已在 GitCommand 中清理）
+            action.put("url", logUrl);
             actions.add(action);
             actionElement.put("actions", actions);
             elements.add(actionElement);
