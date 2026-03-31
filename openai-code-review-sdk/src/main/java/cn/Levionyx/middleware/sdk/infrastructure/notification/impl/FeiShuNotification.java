@@ -56,7 +56,7 @@ public class FeiShuNotification implements INotification {
             JSONObject card = buildCard(logUrl, project, branch, author, reviewContent);
             body.put("content", card.toJSONString());
 
-            logger.info("发送飞书消息, 请求体: {}", body.toJSONString());
+            logger.debug("发送飞书消息, chat_id: {}, 内容长度: {}", chatId, reviewContent.length());
 
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(body.toJSONString().getBytes(StandardCharsets.UTF_8));

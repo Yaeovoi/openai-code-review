@@ -23,9 +23,10 @@ export COMMIT_BRANCH="${BRANCH_NAME}"
 export COMMIT_AUTHOR="${COMMIT_AUTHOR}"
 export COMMIT_MESSAGE="${COMMIT_MESSAGE}"
 
-# 兼容旧的环境变量名称
-if [ -n "$FEISHU_APP_ID" ]; then
-    export API_KEY="${API_KEY:-$GLM_API_KEY}"
+# 兼容旧的环境变量名称（GLM_API_KEY -> API_KEY）
+if [ -z "$API_KEY" ] && [ -n "$GLM_API_KEY" ]; then
+    export API_KEY="$GLM_API_KEY"
+    echo "使用兼容模式: GLM_API_KEY -> API_KEY"
 fi
 
 # 运行代码审查

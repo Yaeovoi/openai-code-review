@@ -38,27 +38,28 @@ public class DeepSeek implements IOpenAI {
     public ChatCompletionSyncResponseDTO completions(ChatCompletionRequestDTO requestDTO) throws Exception {
         URL url = new URL(apiHost);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Authorization", "Bearer " + apiKey);
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setDoOutput(true);
+        try {
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
 
-        try (OutputStream os = connection.getOutputStream()) {
-            byte[] input = JSON.toJSONString(requestDTO).getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = JSON.toJSONString(requestDTO).getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            StringBuilder content = new StringBuilder();
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+            }
+
+            return JSON.parseObject(content.toString(), ChatCompletionSyncResponseDTO.class);
+        } finally {
+            connection.disconnect();
         }
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-
-        String inputLine;
-        StringBuilder content = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            content.append(inputLine);
-        }
-
-        in.close();
-        connection.disconnect();
-
-        return JSON.parseObject(content.toString(), ChatCompletionSyncResponseDTO.class);
     }
 }

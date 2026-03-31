@@ -1,5 +1,8 @@
 package cn.Levionyx.middleware.sdk.domain.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 支持的 AI 模型枚举
  */
@@ -44,11 +47,18 @@ public enum ChatModel {
      * 根据模型代码查找枚举
      */
     public static ChatModel fromCode(String code) {
+        if (code == null || code.isEmpty()) {
+            logger.warn("模型代码为空，使用默认模型: {}", GLM_4_FLASH.getCode());
+            return GLM_4_FLASH;
+        }
         for (ChatModel model : values()) {
             if (model.code.equalsIgnoreCase(code)) {
                 return model;
             }
         }
-        return GLM_4_FLASH; // 默认使用 GLM-4-flash
+        logger.warn("未找到模型代码 [{}]，使用默认模型: {}", code, GLM_4_FLASH.getCode());
+        return GLM_4_FLASH;
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(ChatModel.class);
 }

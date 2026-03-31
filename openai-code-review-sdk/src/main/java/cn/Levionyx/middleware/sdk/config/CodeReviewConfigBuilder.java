@@ -131,15 +131,21 @@ public class CodeReviewConfigBuilder {
 
         String channel = config.getNotification().getChannel();
         if ("feishu".equals(channel)) {
-            if (config.getNotification().getFeishuAppId() == null || config.getNotification().getFeishuAppSecret() == null) {
-                throw new IllegalArgumentException("飞书 AppId 和 AppSecret 不能为空");
+            if (config.getNotification().getFeishuAppId() == null || config.getNotification().getFeishuAppId().isEmpty()) {
+                throw new IllegalArgumentException("飞书 AppId 不能为空");
+            }
+            if (config.getNotification().getFeishuAppSecret() == null || config.getNotification().getFeishuAppSecret().isEmpty()) {
+                throw new IllegalArgumentException("飞书 AppSecret 不能为空");
+            }
+            if (config.getNotification().getFeishuChatId() == null || config.getNotification().getFeishuChatId().isEmpty()) {
+                throw new IllegalArgumentException("飞书 ChatId 不能为空");
             }
         } else if ("dingtalk".equals(channel)) {
-            if (config.getNotification().getDingtalkWebhook() == null) {
+            if (config.getNotification().getDingtalkWebhook() == null || config.getNotification().getDingtalkWebhook().isEmpty()) {
                 throw new IllegalArgumentException("钉钉 Webhook 不能为空");
             }
         } else if ("wecom".equals(channel)) {
-            if (config.getNotification().getWecomWebhook() == null) {
+            if (config.getNotification().getWecomWebhook() == null || config.getNotification().getWecomWebhook().isEmpty()) {
                 throw new IllegalArgumentException("企业微信 Webhook 不能为空");
             }
         }
