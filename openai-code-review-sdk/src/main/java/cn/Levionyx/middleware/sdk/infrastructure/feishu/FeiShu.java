@@ -126,12 +126,14 @@ public class FeiShu {
             header.put("padding", "12px 12px 12px 12px");
             card.put("header", header);
 
-            // body.elements
+            // body.elements - 显示完整的代码审查意见
             java.util.List<JSONObject> elements = new java.util.ArrayList<>();
             elements.add(createMarkdownElement("**项目:** " + sanitize(project)));
             elements.add(createMarkdownElement("**分支:** " + sanitize(branch)));
             elements.add(createMarkdownElement("**作者:** " + sanitize(author)));
-            elements.add(createMarkdownElement("**说明:** " + sanitize(truncate(message, 50))));
+            elements.add(createMarkdownElement("---"));  // 分隔线
+            elements.add(createMarkdownElement("### 审查意见"));
+            elements.add(createMarkdownElement(sanitize(message)));  // 显示完整的审查内容
 
             // button
             JSONObject button = new JSONObject();
