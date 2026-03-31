@@ -80,7 +80,9 @@ public class GitCommand {
             dateFolder.mkdirs();
         }
 
-        String fileName = project + "-" + branch + "-" + author + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(4) + ".md";
+        // 清理 author 中的特殊字符（如邮箱尖括号 <>），避免文件名和 URL 问题
+        String sanitizedAuthor = author == null ? "" : author.replaceAll("[<>:\"/\\\\|?*]", "");
+        String fileName = project + "-" + branch + "-" + sanitizedAuthor + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(4) + ".md";
         File newFile = new File(dateFolder, fileName);
         try (FileWriter writer = new FileWriter(newFile)) {
             writer.write(recommend);
