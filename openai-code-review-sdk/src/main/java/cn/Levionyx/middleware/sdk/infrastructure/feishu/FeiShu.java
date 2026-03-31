@@ -91,39 +91,39 @@ public class FeiShu {
             conn.setRequestProperty("Authorization", "Bearer " + accessToken);
             conn.setDoOutput(true);
 
-            // 构建消息内容
+            // 构建消息内容 - 按照飞书官方文档格式
             JSONObject body = new JSONObject();
             body.put("receive_id", chatId);
             body.put("msg_type", "interactive");
 
-            // 构建简化的卡片消息（去掉可能有问题的 header.template）
+            // 构建 card 结构体（直接作为顶层字段，不是嵌套在 content 中）
             JSONObject card = new JSONObject();
+            card.put("schema", "2.0");
 
             // config
             JSONObject config = new JSONObject();
-            config.put("wide_screen_mode", true);
+            config.put("update_multi", true);
             card.put("config", config);
 
-            // header - 使用标准格式
+            // header
             JSONObject header = new JSONObject();
             JSONObject title = new JSONObject();
             title.put("tag", "plain_text");
             title.put("content", "代码审查通知");
             header.put("title", title);
+            header.put("template", "blue");
             card.put("header", header);
 
-            // elements - 使用简化的 div 格式
+            // body.elements
             java.util.List<JSONObject> elements = new java.util.ArrayList<>();
 
-            elements.add(createDivElement("项目: " + sanitize(project)));
-            elements.add(createDivElement("分支: " + sanitize(branch)));
-            elements.add(createDivElement("作者: " + sanitize(author)));
-            elements.add(createDivElement("说明: " + sanitize(truncate(message, 50))));
+            // 使用 markdown 格式的 div 元素
+            elements.add(createMarkdownElement("**项目:** " + sanitize(project)));
+            elements.add(createMarkdownElement("**分支:** " + sanitize(branch)));
+            elements.add(createMarkdownElement("**作者:** " + sanitize(author)));
+            elements.add(createMarkdownElement("**说明:** " + sanitize(truncate(message, 50))));
 
-            // button - 使用简化格式
-            JSONObject buttonWrapper = new JSONObject();
-            buttonWrapper.put("tag", "action");
-            java.util.List<JSONObject> actions = new java.util.ArrayList<>();
+            // button - 使用 behaviors 定义 URL
             JSONObject button = new JSONObject();
             button.put("tag", "button");
             JSONObject buttonText = new JSONObject();
@@ -131,16 +131,22 @@ public class FeiShu {
             buttonText.put("content", "查看审查详情");
             button.put("text", buttonText);
             button.put("type", "primary");
-            button.put("url", logUrl);
-            actions.add(button);
-            buttonWrapper.put("actions", actions);
-            elements.add(buttonWrapper);
+            // 使用 behaviors 数组定义跳转行为
+            java.util.List<JSONObject> behaviors = new java.util.ArrayList<>();
+            JSONObject openUrl = new JSONObject();
+            openUrl.put("type", "open_url");
+            openUrl.put("default_url", logUrl);
+            behaviors.add(openUrl);
+            button.put("behaviors", behaviors);
+            elements.add(button);
 
-            card.put("elements", elements);
+            JSONObject bodyContent = new JSONObject();
+            bodyContent.put("direction", "vertical");
+            bodyContent.put("elements", elements);
+            card.put("body", bodyContent);
 
-            JSONObject content = new JSONObject();
-            content.put("card", card);
-            body.put("content", content.toJSONString());
+            // 直接将 card 放入 body，不需要额外的 content 包装
+            body.put("card", card);
 
             logger.info("发送飞书消息, 请求体: {}", body.toJSONString());
 
@@ -172,15 +178,12 @@ public class FeiShu {
     }
 
     /**
-     * 创建简单的 div 元素
+     * 创建 markdown 格式的元素
      */
-    private JSONObject createDivElement(String content) {
+    private JSONObject createMarkdownElement(String content) {
         JSONObject element = new JSONObject();
-        element.put("tag", "div");
-        JSONObject text = new JSONObject();
-        text.put("tag", "plain_text");
-        text.put("content", content);
-        element.put("text", text);
+        element.put("tag", "markdown");
+        element.put("content", content);
         return element;
     }
 
