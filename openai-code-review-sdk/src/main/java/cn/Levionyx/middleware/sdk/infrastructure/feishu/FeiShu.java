@@ -91,39 +91,53 @@ public class FeiShu {
             conn.setRequestProperty("Authorization", "Bearer " + accessToken);
             conn.setDoOutput(true);
 
-            // 构建消息内容 - 按照飞书官方文档格式
+            // 构建消息内容 - 按照飞书官方文档示例格式
             JSONObject body = new JSONObject();
             body.put("receive_id", chatId);
             body.put("msg_type", "interactive");
 
-            // 构建 card 结构体（直接作为顶层字段，不是嵌套在 content 中）
+            // 构建 card 结构体
             JSONObject card = new JSONObject();
             card.put("schema", "2.0");
 
-            // config
+            // config - 添加 style 配置
             JSONObject config = new JSONObject();
             config.put("update_multi", true);
+            JSONObject style = new JSONObject();
+            JSONObject textSize = new JSONObject();
+            JSONObject normalV2 = new JSONObject();
+            normalV2.put("default", "normal");
+            normalV2.put("pc", "normal");
+            normalV2.put("mobile", "heading");
+            textSize.put("normal_v2", normalV2);
+            style.put("text_size", textSize);
+            config.put("style", style);
             card.put("config", config);
 
-            // header
+            // header - 添加 padding 和 subtitle
             JSONObject header = new JSONObject();
             JSONObject title = new JSONObject();
             title.put("tag", "plain_text");
             title.put("content", "代码审查通知");
             header.put("title", title);
+            JSONObject subtitle = new JSONObject();
+            subtitle.put("tag", "plain_text");
+            subtitle.put("content", "");
+            header.put("subtitle", subtitle);
             header.put("template", "blue");
+            header.put("padding", "12px 12px 12px 12px");
             card.put("header", header);
 
-            // body.elements
+            // body.elements - 添加 padding
             java.util.List<JSONObject> elements = new java.util.ArrayList<>();
 
-            // 使用 markdown 格式的 div 元素
+            // markdown 元素 - 添加 text_align, text_size, margin
             elements.add(createMarkdownElement("**项目:** " + sanitize(project)));
             elements.add(createMarkdownElement("**分支:** " + sanitize(branch)));
             elements.add(createMarkdownElement("**作者:** " + sanitize(author)));
             elements.add(createMarkdownElement("**说明:** " + sanitize(truncate(message, 50))));
 
-            // button - 使用 behaviors 定义 URL
+            // button - 添加 width, size, margin
             JSONObject button = new JSONObject();
             button.put("tag", "button");
             JSONObject buttonText = new JSONObject();
@@ -131,17 +145,24 @@ public class FeiShu {
             buttonText.put("content", "查看审查详情");
             button.put("text", buttonText);
             button.put("type", "primary");
-            // 使用 behaviors 数组定义跳转行为
+            button.put("width", "default");
+            button.put("size", "medium");
+            button.put("margin", "0px 0px 0px 0px");
+            // behaviors - 添加 pc_url, ios_url, android_url
             java.util.List<JSONObject> behaviors = new java.util.ArrayList<>();
             JSONObject openUrl = new JSONObject();
             openUrl.put("type", "open_url");
             openUrl.put("default_url", logUrl);
+            openUrl.put("pc_url", "");
+            openUrl.put("ios_url", "");
+            openUrl.put("android_url", "");
             behaviors.add(openUrl);
             button.put("behaviors", behaviors);
             elements.add(button);
 
             JSONObject bodyContent = new JSONObject();
             bodyContent.put("direction", "vertical");
+            bodyContent.put("padding", "12px 12px 12px 12px");
             bodyContent.put("elements", elements);
             card.put("body", bodyContent);
 
@@ -180,12 +201,15 @@ public class FeiShu {
     }
 
     /**
-     * 创建 markdown 格式的元素
+     * 创建 markdown 格式的元素（完整格式）
      */
     private JSONObject createMarkdownElement(String content) {
         JSONObject element = new JSONObject();
         element.put("tag", "markdown");
         element.put("content", content);
+        element.put("text_align", "left");
+        element.put("text_size", "normal_v2");
+        element.put("margin", "0px 0px 0px 0px");
         return element;
     }
 
