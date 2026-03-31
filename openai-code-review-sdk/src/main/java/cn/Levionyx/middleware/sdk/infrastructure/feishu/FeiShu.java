@@ -135,7 +135,6 @@ public class FeiShu {
             elements.add(createMarkdownElement("**分支:** " + sanitize(branch)));
             elements.add(createMarkdownElement("**作者:** " + sanitize(author)));
             elements.add(createMarkdownElement("---"));  // 分隔线
-            elements.add(createMarkdownElement("### 审查意见"));
 
             // 将长内容拆分成多个 markdown 元素，绕过飞书长度限制
             String sanitizedMessage = sanitize(message);
