@@ -35,7 +35,15 @@ public class Anthropic extends AbstractOpenAI {
     }
 
     public Anthropic(String apiHost, String apiKey) {
-        super(DEFAULT_API_HOST, apiHost, apiKey, MESSAGES_PATH);
+        super(DEFAULT_API_HOST, apiHost, apiKey, MESSAGES_PATH, DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
+    }
+
+    public Anthropic(String apiKey, int readTimeout) {
+        super(DEFAULT_API_HOST, null, apiKey, MESSAGES_PATH, DEFAULT_CONNECT_TIMEOUT, readTimeout);
+    }
+
+    public Anthropic(String apiHost, String apiKey, int readTimeout) {
+        super(DEFAULT_API_HOST, apiHost, apiKey, MESSAGES_PATH, DEFAULT_CONNECT_TIMEOUT, readTimeout);
     }
 
     @Override
@@ -85,8 +93,8 @@ public class Anthropic extends AbstractOpenAI {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("anthropic-version", ANTHROPIC_VERSION);
         connection.setDoOutput(true);
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-        connection.setReadTimeout(READ_TIMEOUT);
+        connection.setConnectTimeout(connectTimeout);
+        connection.setReadTimeout(readTimeout);
     }
 
     /**

@@ -127,13 +127,15 @@ public class CodeReviewRunner {
         String apiHost = config.getApiHost();
         String apiKey = config.getApiKey();
         String protocol = config.getApiProtocol();
+        int timeout = config.getApiTimeout();
 
-        logger.info("创建 AI 模型: modelCode={}, apiHost={}, protocol={}",
+        logger.info("创建 AI 模型: modelCode={}, apiHost={}, protocol={}, timeout={}s",
             modelCode,
             apiHost != null ? "已配置" : "使用默认",
-            protocol);
+            protocol,
+            timeout / 1000);
 
-        return ChatModelFactory.create(modelCode, apiHost, apiKey, protocol);
+        return ChatModelFactory.create(modelCode, apiHost, apiKey, protocol, timeout);
     }
 
     /**

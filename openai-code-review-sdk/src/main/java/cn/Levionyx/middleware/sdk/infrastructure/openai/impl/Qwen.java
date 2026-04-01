@@ -20,6 +20,14 @@ public class Qwen extends AbstractOpenAI {
         super(DEFAULT_API_HOST, apiHost, apiKey);
     }
 
+    public Qwen(String apiKey, int readTimeout) {
+        super(DEFAULT_API_HOST, null, apiKey, DEFAULT_CONNECT_TIMEOUT, readTimeout);
+    }
+
+    public Qwen(String apiHost, String apiKey, int readTimeout) {
+        super(DEFAULT_API_HOST, apiHost, apiKey, DEFAULT_CONNECT_TIMEOUT, readTimeout);
+    }
+
     @Override
     protected String getApiName() {
         return "Qwen";

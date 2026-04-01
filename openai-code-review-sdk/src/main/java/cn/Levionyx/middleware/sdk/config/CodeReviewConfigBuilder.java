@@ -190,6 +190,15 @@ public class CodeReviewConfigBuilder {
         }
         config.setApiKey(apiKey);
 
+        // API 超时配置（单位：秒，默认 180 秒 = 3 分钟）
+        String timeoutStr = getEnvOrDefault("API_TIMEOUT", "180");
+        try {
+            int timeoutSeconds = Integer.parseInt(timeoutStr);
+            config.setApiTimeout(timeoutSeconds * 1000);  // 转换为毫秒
+        } catch (NumberFormatException e) {
+            config.setApiTimeout(180000);  // 默认 3 分钟
+        }
+
         // 通知配置
         String channel = getEnvOrDefault("NOTIFICATION_CHANNEL", "feishu");
         config.getNotification().setChannel(channel);

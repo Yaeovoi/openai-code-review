@@ -18,6 +18,7 @@ public class CodeReviewConfig {
     private String apiHost;  // 可选，自定义 API 地址
     private String apiProtocol;  // 可选，API 协议：openai 或 anthropic
     private String apiKey;
+    private int apiTimeout;  // 可选，API 读取超时时间（毫秒），默认 3 分钟
 
     // ========== 通知配置 ==========
     private NotificationConfig notification = new NotificationConfig();
@@ -246,6 +247,14 @@ public class CodeReviewConfig {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public int getApiTimeout() {
+        return apiTimeout;
+    }
+
+    public void setApiTimeout(int apiTimeout) {
+        this.apiTimeout = apiTimeout;
     }
 
     public NotificationConfig getNotification() {

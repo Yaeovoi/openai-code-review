@@ -78,6 +78,7 @@ openai-code-review
 | `CHAT_MODEL` | 否 | AI 模型代码 | `qwen-coder-plus`（默认） |
 | `API_HOST` | 否 | 自定义 API 地址 | `https://coding.dashscope.aliyuncs.com/v1` |
 | `API_PROTOCOL` | 否 | API 协议 | `openai`（默认）或 `anthropic` |
+| `API_TIMEOUT` | 否 | API 超时时间（秒） | `180`（默认 3 分钟） |
 | `FEISHU_APP_ID` | 飞书必填 | 飞书应用 ID | `cli_xxx` |
 | `FEISHU_APP_SECRET` | 飞书必填 | 飞书应用密钥 | `xxx` |
 | `FEISHU_CHAT_ID` | 飞书必填 | 飞书群聊 ID | `oc_xxx` |
@@ -113,7 +114,7 @@ jobs:
       - name: Download Code Review SDK
         run: |
           mkdir -p ./libs
-          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.9/openai-code-review-sdk-1.0.jar
+          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.10/openai-code-review-sdk-1.0.jar
 
       - name: Get commit info
         run: |
@@ -136,6 +137,7 @@ jobs:
           CHAT_MODEL: ${{ secrets.CHAT_MODEL }}
           API_HOST: ${{ secrets.API_HOST }}
           API_PROTOCOL: ${{ secrets.API_PROTOCOL }}
+          API_TIMEOUT: ${{ secrets.API_TIMEOUT }}  # 可选，默认 180 秒
           # 飞书配置
           NOTIFICATION_CHANNEL: feishu
           FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
@@ -228,6 +230,10 @@ env:
 MIT License
 
 ## 变更日志
+
+### V1.10 (2026-04-01)
+- **可配置超时时间** - 新增 `API_TIMEOUT` 环境变量，用户可自定义 AI 模型 API 调用的超时时间（单位：秒，默认 180 秒）
+- 解决之前需要反复修改代码增加超时时间的问题
 
 ### V1.9 (2026-04-01)
 - 增加读取超时到 3 分钟，解决 AI 模型处理大量代码时的超时问题

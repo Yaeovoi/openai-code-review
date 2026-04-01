@@ -17,6 +17,14 @@ public class DeepSeek extends AbstractOpenAI {
         super(DEFAULT_API_HOST, apiHost, apiKey);
     }
 
+    public DeepSeek(String apiKey, int readTimeout) {
+        super(DEFAULT_API_HOST, null, apiKey, DEFAULT_CONNECT_TIMEOUT, readTimeout);
+    }
+
+    public DeepSeek(String apiHost, String apiKey, int readTimeout) {
+        super(DEFAULT_API_HOST, apiHost, apiKey, DEFAULT_CONNECT_TIMEOUT, readTimeout);
+    }
+
     @Override
     protected String getApiName() {
         return "DeepSeek";

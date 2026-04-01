@@ -25,29 +25,38 @@ public abstract class AbstractOpenAI implements IOpenAI {
     protected static final String CHAT_COMPLETIONS_PATH = "/chat/completions";
     protected static final String PATH_SUFFIX = "chat/completions";
 
-    /** 连接超时时间（毫秒） */
-    protected static final int CONNECT_TIMEOUT = 30000;
-    /** 读取超时时间（毫秒）- 3分钟，AI 模型处理代码审查可能需要较长时间 */
-    protected static final int READ_TIMEOUT = 180000;
+    /** 默认连接超时时间（毫秒） */
+    protected static final int DEFAULT_CONNECT_TIMEOUT = 30000;
+    /** 默认读取超时时间（毫秒）- 3分钟 */
+    protected static final int DEFAULT_READ_TIMEOUT = 180000;
 
     protected final String apiHost;
     protected final String apiKey;
+    protected final int connectTimeout;
+    protected final int readTimeout;
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected AbstractOpenAI(String defaultApiHost, String apiKey) {
-        this.apiHost = defaultApiHost;
-        this.apiKey = apiKey;
+        this(defaultApiHost, null, apiKey, DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
     protected AbstractOpenAI(String defaultApiHost, String apiHost, String apiKey) {
-        this.apiHost = normalizeApiHost(apiHost, defaultApiHost, CHAT_COMPLETIONS_PATH);
-        this.apiKey = apiKey;
+        this(defaultApiHost, apiHost, apiKey, DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
-    protected AbstractOpenAI(String defaultApiHost, String apiHost, String apiKey, String apiPath) {
+    protected AbstractOpenAI(String defaultApiHost, String apiHost, String apiKey, int connectTimeout, int readTimeout) {
+        this.apiHost = normalizeApiHost(apiHost, defaultApiHost, CHAT_COMPLETIONS_PATH);
+        this.apiKey = apiKey;
+        this.connectTimeout = connectTimeout > 0 ? connectTimeout : DEFAULT_CONNECT_TIMEOUT;
+        this.readTimeout = readTimeout > 0 ? readTimeout : DEFAULT_READ_TIMEOUT;
+    }
+
+    protected AbstractOpenAI(String defaultApiHost, String apiHost, String apiKey, String apiPath, int connectTimeout, int readTimeout) {
         this.apiHost = normalizeApiHost(apiHost, defaultApiHost, apiPath);
         this.apiKey = apiKey;
+        this.connectTimeout = connectTimeout > 0 ? connectTimeout : DEFAULT_CONNECT_TIMEOUT;
+        this.readTimeout = readTimeout > 0 ? readTimeout : DEFAULT_READ_TIMEOUT;
     }
 
     /**
@@ -116,7 +125,7 @@ public abstract class AbstractOpenAI implements IOpenAI {
             setupConnection(connection);
 
             String requestBody = JSON.toJSONString(requestDTO);
-            logger.debug("API 请求: host={}", apiHost);
+            logger.debug("API 请求: host={}, timeout={}s", apiHost, readTimeout / 1000);
 
             // 发送请求
             try (OutputStream os = connection.getOutputStream()) {
@@ -148,8 +157,8 @@ public abstract class AbstractOpenAI implements IOpenAI {
         connection.setRequestProperty("Authorization", "Bearer " + apiKey);
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoOutput(true);
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-        connection.setReadTimeout(READ_TIMEOUT);
+        connection.setConnectTimeout(connectTimeout);
+        connection.setReadTimeout(readTimeout);
     }
 
     /**
