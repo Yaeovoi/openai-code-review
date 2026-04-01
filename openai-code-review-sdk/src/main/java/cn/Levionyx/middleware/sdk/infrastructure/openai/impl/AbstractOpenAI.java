@@ -27,8 +27,8 @@ public abstract class AbstractOpenAI implements IOpenAI {
 
     /** 连接超时时间（毫秒） */
     protected static final int CONNECT_TIMEOUT = 30000;
-    /** 读取超时时间（毫秒）- 2分钟，AI 模型处理代码审查可能需要较长时间 */
-    protected static final int READ_TIMEOUT = 120000;
+    /** 读取超时时间（毫秒）- 3分钟，AI 模型处理代码审查可能需要较长时间 */
+    protected static final int READ_TIMEOUT = 180000;
 
     protected final String apiHost;
     protected final String apiKey;
