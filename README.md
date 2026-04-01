@@ -113,7 +113,7 @@ jobs:
       - name: Download Code Review SDK
         run: |
           mkdir -p ./libs
-          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.8/openai-code-review-sdk-1.0.jar
+          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.9/openai-code-review-sdk-1.0.jar
 
       - name: Get commit info
         run: |
@@ -228,6 +228,9 @@ env:
 MIT License
 
 ## 变更日志
+
+### V1.9 (2026-04-01)
+- 增加读取超时到 3 分钟，解决 AI 模型处理大量代码时的超时问题
 
 ### V1.8 (2026-04-01)
 - 增加读取超时时间到 2 分钟，解决 AI 模型处理代码审查时的超时问题
