@@ -114,7 +114,7 @@ jobs:
       - name: Download Code Review SDK
         run: |
           mkdir -p ./libs
-          wget -O ./libs/openai-code-review-sdk.jar https://github.com/Yaeovoi/openai-code-review/releases/latest/download/openai-code-review-sdk-1.0.jar
+          wget -O ./libs/openai-code-review-sdk.jar https://github.com/Yaeovoi/openai-code-review/releases/latest/download/openai-code-review-sdk.jar
 
       - name: Get commit info
         run: |
@@ -126,7 +126,7 @@ jobs:
           echo "COMMIT_SHA=$(git log -1 --pretty=format:'%H')" >> $GITHUB_ENV
 
       - name: Run Code Review
-        run: java -jar ./libs/openai-code-review-sdk-1.0.jar
+        run: java -jar ./libs/openai-code-review-sdk.jar
         env:
           GITHUB_REVIEW_LOG_URI: ${{ secrets.CODE_REVIEW_LOG_URI }}
           GITHUB_TOKEN: ${{ secrets.CODE_TOKEN }}
