@@ -56,7 +56,8 @@ public class CodeReviewRunner {
             logger.info("审查结果已保存: {}", logUrl);
 
             // 4. 发送通知
-            notification.send(logUrl, config.getProject(), config.getBranch(), config.getAuthor(), config.getMessage(), reviewResult);
+            String commitUrl = buildCommitUrl(config.getRepo(), config.getCommitSha());
+            notification.send(logUrl, config.getProject(), config.getBranch(), config.getAuthor(), config.getMessage(), commitUrl, reviewResult);
             logger.info("代码审查通知已发送");
 
         } catch (Exception e) {
@@ -158,6 +159,16 @@ public class CodeReviewRunner {
             default:
                 throw new IllegalArgumentException("不支持的通知渠道: " + channel);
         }
+    }
+
+    /**
+     * 构建 commit URL
+     */
+    private String buildCommitUrl(String repo, String commitSha) {
+        if (repo == null || repo.isEmpty() || commitSha == null || commitSha.isEmpty()) {
+            return null;
+        }
+        return "https://github.com/" + repo + "/commit/" + commitSha;
     }
 
     /**

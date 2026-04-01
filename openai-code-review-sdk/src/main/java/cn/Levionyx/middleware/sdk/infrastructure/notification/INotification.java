@@ -13,10 +13,11 @@ public interface INotification {
      * @param branch  分支名称
      * @param author  提交作者
      * @param message 提交信息
+     * @param commitUrl commit 链接（点击可跳转到 GitHub commit 页面）
      * @param reviewContent 审查内容
      * @throws Exception 发送失败
      */
-    void send(String logUrl, String project, String branch, String author, String message, String reviewContent) throws Exception;
+    void send(String logUrl, String project, String branch, String author, String message, String commitUrl, String reviewContent) throws Exception;
 
     /**
      * 获取通知渠道名称

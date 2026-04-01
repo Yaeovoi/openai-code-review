@@ -25,7 +25,7 @@ public class WeComNotification implements INotification {
     }
 
     @Override
-    public void send(String logUrl, String project, String branch, String author, String message, String reviewContent) throws Exception {
+    public void send(String logUrl, String project, String branch, String author, String message, String commitUrl, String reviewContent) throws Exception {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(webhook);
@@ -45,7 +45,12 @@ public class WeComNotification implements INotification {
             content.append("> **项目:** ").append(sanitize(project)).append("\n");
             content.append("> **分支:** ").append(sanitize(branch)).append("\n");
             content.append("> **作者:** ").append(sanitize(author)).append("\n");
-            content.append("> **提交:** ").append(sanitize(message)).append("\n\n");
+            // 提交信息：如果有 commitUrl，显示为超链接
+            if (commitUrl != null && !commitUrl.isEmpty()) {
+                content.append("> **提交:** [").append(sanitize(message)).append("](").append(commitUrl).append(")\n\n");
+            } else {
+                content.append("> **提交:** ").append(sanitize(message)).append("\n\n");
+            }
             content.append(sanitize(reviewContent)).append("\n\n");
             content.append("[查看审查详情](").append(logUrl).append(")");
 

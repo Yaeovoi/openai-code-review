@@ -9,9 +9,11 @@ public class CodeReviewConfig {
     private String githubReviewLogUri;
     private String githubToken;
     private String project;
+    private String repo;  // 完整仓库路径，如 Yaeovoi/test-code-review
     private String branch;
     private String author;
     private String message;
+    private String commitSha;  // commit hash，用于构建 commit URL
 
     // ========== AI 模型配置 ==========
     private String chatModelCode;  // 用户配置的原始模型代码
@@ -193,6 +195,14 @@ public class CodeReviewConfig {
         this.project = project;
     }
 
+    public String getRepo() {
+        return repo;
+    }
+
+    public void setRepo(String repo) {
+        this.repo = repo;
+    }
+
     public String getBranch() {
         return branch;
     }
@@ -215,6 +225,14 @@ public class CodeReviewConfig {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getCommitSha() {
+        return commitSha;
+    }
+
+    public void setCommitSha(String commitSha) {
+        this.commitSha = commitSha;
     }
 
     public String getChatModelCode() {

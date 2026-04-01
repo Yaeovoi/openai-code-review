@@ -169,9 +169,11 @@ public class CodeReviewConfigBuilder {
         config.setGithubReviewLogUri(getEnv("GITHUB_REVIEW_LOG_URI"));
         config.setGithubToken(getEnv("GITHUB_TOKEN"));
         config.setProject(getEnv("COMMIT_PROJECT"));
+        config.setRepo(getEnvOrDefault("COMMIT_REPO", null));
         config.setBranch(getEnv("COMMIT_BRANCH"));
         config.setAuthor(getEnv("COMMIT_AUTHOR"));
         config.setMessage(getEnv("COMMIT_MESSAGE"));
+        config.setCommitSha(getEnvOrDefault("COMMIT_SHA", null));
 
         // AI 模型配置
         // 用户配置了 CHAT_MODEL 就用用户的，否则用默认值

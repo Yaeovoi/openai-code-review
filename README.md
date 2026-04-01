@@ -114,14 +114,16 @@ jobs:
       - name: Download Code Review SDK
         run: |
           mkdir -p ./libs
-          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.11/openai-code-review-sdk-1.0.jar
+          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.12/openai-code-review-sdk-1.0.jar
 
       - name: Get commit info
         run: |
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+          echo "REPO_FULL=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')" >> $GITHUB_ENV
           echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$(git log -1 --pretty=format:'%H')" >> $GITHUB_ENV
 
       - name: Run Code Review
         run: java -jar ./libs/openai-code-review-sdk-1.0.jar
@@ -129,9 +131,11 @@ jobs:
           GITHUB_REVIEW_LOG_URI: ${{ secrets.CODE_REVIEW_LOG_URI }}
           GITHUB_TOKEN: ${{ secrets.CODE_TOKEN }}
           COMMIT_PROJECT: ${{ env.REPO_NAME }}
+          COMMIT_REPO: ${{ env.REPO_FULL }}
           COMMIT_BRANCH: ${{ env.BRANCH_NAME }}
           COMMIT_AUTHOR: ${{ env.COMMIT_AUTHOR }}
           COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
+          COMMIT_SHA: ${{ env.COMMIT_SHA }}
           # AI 模型配置
           API_KEY: ${{ secrets.API_KEY }}
           CHAT_MODEL: ${{ secrets.CHAT_MODEL }}
@@ -231,6 +235,9 @@ env:
 MIT License
 
 ## 变更日志
+
+### V1.12 (2026-04-02)
+- **提交信息支持超链接** - 点击提交信息可直接跳转到 GitHub commit 页面
 
 ### V1.11 (2026-04-02)
 - **通知消息增加提交信息** - 飞书/钉钉/企业微信通知卡片新增"提交"字段，显示 commit message

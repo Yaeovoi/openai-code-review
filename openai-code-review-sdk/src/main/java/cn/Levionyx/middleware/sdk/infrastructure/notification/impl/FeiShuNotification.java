@@ -37,7 +37,7 @@ public class FeiShuNotification implements INotification {
     }
 
     @Override
-    public void send(String logUrl, String project, String branch, String author, String message, String reviewContent) throws Exception {
+    public void send(String logUrl, String project, String branch, String author, String message, String commitUrl, String reviewContent) throws Exception {
         String accessToken = getAccessToken();
 
         HttpURLConnection conn = null;
@@ -53,7 +53,7 @@ public class FeiShuNotification implements INotification {
             body.put("receive_id", chatId);
             body.put("msg_type", "interactive");
 
-            JSONObject card = buildCard(logUrl, project, branch, author, message, reviewContent);
+            JSONObject card = buildCard(logUrl, project, branch, author, message, commitUrl, reviewContent);
             body.put("content", card.toJSONString());
 
             logger.debug("发送飞书消息, chat_id: {}, 内容长度: {}", chatId, reviewContent.length());
@@ -129,7 +129,7 @@ public class FeiShuNotification implements INotification {
         }
     }
 
-    private JSONObject buildCard(String logUrl, String project, String branch, String author, String message, String reviewContent) {
+    private JSONObject buildCard(String logUrl, String project, String branch, String author, String message, String commitUrl, String reviewContent) {
         JSONObject card = new JSONObject();
         card.put("schema", "2.0");
 
@@ -162,7 +162,12 @@ public class FeiShuNotification implements INotification {
         elements.add(createMarkdownElement("**项目:** " + sanitize(project)));
         elements.add(createMarkdownElement("**分支:** " + sanitize(branch)));
         elements.add(createMarkdownElement("**作者:** " + sanitize(author)));
-        elements.add(createMarkdownElement("**提交:** " + sanitize(message)));
+        // 提交信息：如果有 commitUrl，显示为可点击的超链接
+        if (commitUrl != null && !commitUrl.isEmpty()) {
+            elements.add(createMarkdownElement("**提交:** [" + sanitize(message) + "](" + commitUrl + ")"));
+        } else {
+            elements.add(createMarkdownElement("**提交:** " + sanitize(message)));
+        }
         elements.add(createMarkdownElement("---"));
 
         String sanitizedContent = sanitize(reviewContent);
