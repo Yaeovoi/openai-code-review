@@ -56,7 +56,7 @@ public class CodeReviewRunner {
             logger.info("审查结果已保存: {}", logUrl);
 
             // 4. 发送通知
-            notification.send(logUrl, config.getProject(), config.getBranch(), config.getAuthor(), reviewResult);
+            notification.send(logUrl, config.getProject(), config.getBranch(), config.getAuthor(), config.getMessage(), reviewResult);
             logger.info("代码审查通知已发送");
 
         } catch (Exception e) {

@@ -199,7 +199,8 @@ env:
 3. 开通权限：`im:message:send_as_bot`
 4. 发布应用版本
 5. 将应用添加到目标群聊
-6. 获取 App ID、App Secret 和 Chat ID
+6. 获取 App ID、App Secret 和 Chat ID.
+   获取 Chat ID 参考 : https://waytoagi.feishu.cn/wiki/EfEpw2hpSiVVuRk9zi3cjrrAn6I
 
 ## 飞书卡片效果
 
