@@ -8,7 +8,13 @@ import org.slf4j.LoggerFactory;
  */
 public enum ChatModel {
 
-    // 阿里云百炼 GLM 系列
+    // 阿里云百炼 Qwen 系列（codingplan 专用 API）
+    QWEN_TURBO("qwen-turbo", "qwen", "阿里云百炼 Qwen-Turbo"),
+    QWEN_PLUS("qwen-plus", "qwen", "阿里云百炼 Qwen-Plus"),
+    QWEN_MAX("qwen-max", "qwen", "阿里云百炼 Qwen-Max"),
+    QWEN_CODER_PLUS("qwen-coder-plus", "qwen", "阿里云百炼 Qwen-Coder-Plus（代码专用）"),
+
+    // 阿里云百炼 GLM 系列（通过百炼代理）
     GLM_4_FLASH("glm-4-flash", "glm", "阿里云百炼 GLM-4-Flash"),
     GLM_4("glm-4", "glm", "阿里云百炼 GLM-4"),
 
@@ -48,16 +54,16 @@ public enum ChatModel {
      */
     public static ChatModel fromCode(String code) {
         if (code == null || code.isEmpty()) {
-            logger.warn("模型代码为空，使用默认模型: {}", GLM_4_FLASH.getCode());
-            return GLM_4_FLASH;
+            logger.warn("模型代码为空，使用默认模型: {}", QWEN_CODER_PLUS.getCode());
+            return QWEN_CODER_PLUS;
         }
         for (ChatModel model : values()) {
             if (model.code.equalsIgnoreCase(code)) {
                 return model;
             }
         }
-        logger.warn("未找到模型代码 [{}]，使用默认模型: {}", code, GLM_4_FLASH.getCode());
-        return GLM_4_FLASH;
+        logger.warn("未找到模型代码 [{}]，使用默认模型: {}", code, QWEN_CODER_PLUS.getCode());
+        return QWEN_CODER_PLUS;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(ChatModel.class);

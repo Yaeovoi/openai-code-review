@@ -63,6 +63,24 @@ public class CodeReviewConfigBuilder {
     }
 
     /**
+     * 设置 API 配置（自定义 Host 和协议）
+     */
+    public CodeReviewConfigBuilder api(String apiHost, String apiKey, String protocol) {
+        config.setApiHost(apiHost);
+        config.setApiKey(apiKey);
+        config.setApiProtocol(protocol);
+        return this;
+    }
+
+    /**
+     * 设置 API 协议
+     */
+    public CodeReviewConfigBuilder protocol(String protocol) {
+        config.setApiProtocol(protocol);
+        return this;
+    }
+
+    /**
      * 设置飞书通知
      */
     public CodeReviewConfigBuilder feishu(String appId, String appSecret, String chatId) {
@@ -166,9 +184,10 @@ public class CodeReviewConfigBuilder {
         config.setMessage(getEnv("COMMIT_MESSAGE"));
 
         // AI 模型配置
-        String modelCode = getEnvOrDefault("CHAT_MODEL", "glm-4-flash");
+        String modelCode = getEnvOrDefault("CHAT_MODEL", "qwen-coder-plus");
         config.setChatModel(ChatModel.fromCode(modelCode));
         config.setApiHost(getEnvOrDefault("API_HOST", null));
+        config.setApiProtocol(getEnvOrDefault("API_PROTOCOL", "openai"));  // 默认 openai 协议
         // 支持 API_KEY 或 GLM_API_KEY（向后兼容）
         String apiKey = getEnvOrDefault("API_KEY", null);
         if (apiKey == null) {

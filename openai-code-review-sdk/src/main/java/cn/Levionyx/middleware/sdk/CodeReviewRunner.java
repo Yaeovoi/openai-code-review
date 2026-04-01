@@ -119,11 +119,12 @@ public class CodeReviewRunner {
         ChatModel model = config.getChatModel();
         String apiHost = config.getApiHost();
         String apiKey = config.getApiKey();
+        String protocol = config.getApiProtocol();
 
         if (apiHost != null && !apiHost.isEmpty()) {
-            return ChatModelFactory.create(model, apiHost, apiKey);
+            return ChatModelFactory.create(model, apiHost, apiKey, protocol);
         }
-        return ChatModelFactory.create(model, apiKey);
+        return ChatModelFactory.create(model, apiKey, protocol);
     }
 
     /**

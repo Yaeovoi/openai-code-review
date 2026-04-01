@@ -16,15 +16,19 @@ inputs:
 
   # AI 模型配置
   chat-model:
-    description: 'AI model to use (glm-4-flash, gpt-4o, deepseek-chat, etc.)'
+    description: 'AI model to use (qwen-coder-plus, qwen-turbo, glm-4-flash, gpt-4o, deepseek-chat, claude-3-opus, etc.)'
     required: false
-    default: 'glm-4-flash'
+    default: 'qwen-coder-plus'
   api-key:
     description: 'API Key for the AI model'
     required: true
   api-host:
     description: 'Custom API host (optional)'
     required: false
+  api-protocol:
+    description: 'API protocol: openai or anthropic (default: openai)'
+    required: false
+    default: 'openai'
 
   # 通知配置
   notification-channel:
@@ -67,6 +71,7 @@ runs:
     CHAT_MODEL: ${{ inputs.chat-model }}
     API_KEY: ${{ inputs.api-key }}
     API_HOST: ${{ inputs.api-host }}
+    API_PROTOCOL: ${{ inputs.api-protocol }}
     NOTIFICATION_CHANNEL: ${{ inputs.notification-channel }}
     FEISHU_APP_ID: ${{ inputs.feishu-app-id }}
     FEISHU_APP_SECRET: ${{ inputs.feishu-app-secret }}

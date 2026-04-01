@@ -4,7 +4,8 @@
 
 ## 功能特性
 
-- **多 AI 模型支持** - 支持 GLM、OpenAI、DeepSeek 等多种模型，可自由切换
+- **多 AI 模型支持** - 支持 Qwen、GLM、OpenAI、DeepSeek、Claude 等多种模型
+- **多 API 协议** - 支持 OpenAI 协议和 Anthropic 协议
 - **多通知渠道** - 支持飞书、钉钉、企业微信，可同时推送到多个渠道
 - **一键接入** - 作为 GitHub Action 使用，只需一行配置
 - **配置化设计** - 支持自定义审查规则、提示词
@@ -13,14 +14,27 @@
 
 ## 支持的 AI 模型
 
-| 模型 | 代码 | 说明 |
-|------|------|------|
-| GLM-4-Flash | `glm-4-flash` | 阿里云百炼，默认模型 |
-| GLM-4 | `glm-4` | 阿里云百炼 |
-| GPT-4o | `gpt-4o` | OpenAI |
-| GPT-4o-mini | `gpt-4o-mini` | OpenAI |
-| DeepSeek-Chat | `deepseek-chat` | DeepSeek |
-| DeepSeek-Coder | `deepseek-coder` | DeepSeek |
+| 模型 | 代码 | Provider | 说明 |
+|------|------|----------|------|
+| Qwen-Coder-Plus | `qwen-coder-plus` | qwen | 阿里云灵码，**代码专用，默认模型** |
+| Qwen-Turbo | `qwen-turbo` | qwen | 阿里云灵码，速度快 |
+| Qwen-Plus | `qwen-plus` | qwen | 阿里云灵码，均衡 |
+| Qwen-Max | `qwen-max` | qwen | 阿里云灵码，最强 |
+| GLM-4-Flash | `glm-4-flash` | glm | 阿里云百炼 GLM |
+| GLM-4 | `glm-4` | glm | 阿里云百炼 GLM |
+| GPT-4o | `gpt-4o` | openai | OpenAI |
+| GPT-4o-mini | `gpt-4o-mini` | openai | OpenAI |
+| GPT-4-turbo | `gpt-4-turbo` | openai | OpenAI |
+| DeepSeek-Chat | `deepseek-chat` | deepseek | DeepSeek |
+| DeepSeek-Coder | `deepseek-coder` | deepseek | DeepSeek |
+| Claude-3-Opus | `claude-3-opus` | anthropic | Anthropic（需设置 API_PROTOCOL=anthropic） |
+| Claude-3-Sonnet | `claude-3-sonnet` | anthropic | Anthropic（需设置 API_PROTOCOL=anthropic） |
+| Claude-3-Haiku | `claude-3-haiku` | anthropic | Anthropic（需设置 API_PROTOCOL=anthropic） |
+
+> **提示**：
+> - 模型与 API 地址自动匹配，也可通过 `API_HOST` 自定义
+> - 大多数模型服务兼容 **OpenAI 协议**，默认使用 `openai`
+> - **Anthropic Claude** 不兼容 OpenAI 协议，需设置 `API_PROTOCOL=anthropic`
 
 ## 支持的通知渠道
 
@@ -139,8 +153,9 @@ new CodeReviewRunner(config).run();
 | `github-token` | 是 | GitHub Personal Access Token |
 | `review-log-uri` | 是 | 审查结果存储仓库地址 |
 | `api-key` | 是 | AI 模型 API Key |
-| `chat-model` | 否 | AI 模型，默认 `glm-4-flash` |
-| `api-host` | 否 | 自定义 API 地址 |
+| `chat-model` | 否 | AI 模型，默认 `qwen-coder-plus` |
+| `api-host` | 否 | 自定义 API 地址（可选） |
+| `api-protocol` | 否 | API 协议：`openai` 或 `anthropic`，默认 `openai` |
 | `notification-channel` | 否 | 通知渠道，默认 `feishu` |
 | `feishu-app-id` | 飞书必填 | 飞书应用 ID |
 | `feishu-app-secret` | 飞书必填 | 飞书应用密钥 |
@@ -159,7 +174,9 @@ new CodeReviewRunner(config).run();
 | `GITHUB_TOKEN` | 是 | GitHub 访问令牌 |
 | `API_KEY` | 是* | AI 模型 API Key |
 | `GLM_API_KEY` | 是* | AI 模型 API Key（向后兼容，与 API_KEY 二选一） |
-| `CHAT_MODEL` | 否 | AI 模型代码，默认 `glm-4-flash` |
+| `CHAT_MODEL` | 否 | AI 模型代码，默认 `qwen-coder-plus` |
+| `API_HOST` | 否 | 自定义 API 地址（可选） |
+| `API_PROTOCOL` | 否 | API 协议：`openai` 或 `anthropic`，默认 `openai` |
 | `NOTIFICATION_CHANNEL` | 否 | 通知渠道，默认 `feishu` |
 | `FEISHU_APP_ID` | 飞书必填 | 飞书应用 ID |
 | `FEISHU_APP_SECRET` | 飞书必填 | 飞书应用密钥 |
@@ -168,6 +185,26 @@ new CodeReviewRunner(config).run();
 | `WECOM_WEBHOOK` | 企微必填 | 企业微信 Webhook |
 
 > *`API_KEY` 和 `GLM_API_KEY` 二选一，推荐使用 `API_KEY`
+
+### GitHub Secrets 配置
+
+在项目的 **Settings → Secrets and variables → Actions** 中添加以下 secrets：
+
+| Secret 名称 | 必填 | 说明 | 示例 |
+|-------------|------|------|------|
+| `API_KEY` | 是 | AI 模型 API Key | `sk-xxx...` |
+| `CHAT_MODEL` | 否 | AI 模型代码 | `qwen-coder-plus`、`glm-4-flash`、`gpt-4o`、`claude-3-opus` |
+| `API_HOST` | 否 | 自定义 API 地址 | `https://your-custom-api.com/v1/chat/completions` |
+| `API_PROTOCOL` | 否 | API 协议 | `openai`（默认）或 `anthropic` |
+
+> **如何选择 API 协议？**
+> - **OpenAI 协议**（默认）：适用于 Qwen、GLM、OpenAI、DeepSeek、智谱、月之暗面等大多数模型服务
+> - **Anthropic 协议**：仅用于 Anthropic Claude 模型，需要设置 `API_PROTOCOL=anthropic`
+
+> **提示**：
+> - `CHAT_MODEL` 未配置时，默认使用 `qwen-coder-plus`
+> - `API_HOST` 未配置时，根据模型 provider 自动选择对应的默认 API 地址
+> - `API_PROTOCOL` 未配置时，默认使用 `openai` 协议
 
 ## 前置准备
 

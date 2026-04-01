@@ -16,8 +16,9 @@ public class CodeReviewConfig {
     private String message;
 
     // ========== AI 模型配置 ==========
-    private ChatModel chatModel = ChatModel.GLM_4_FLASH;
+    private ChatModel chatModel = ChatModel.QWEN_CODER_PLUS;
     private String apiHost;  // 可选，自定义 API 地址
+    private String apiProtocol;  // 可选，API 协议：openai 或 anthropic
     private String apiKey;
 
     // ========== 通知配置 ==========
@@ -231,6 +232,14 @@ public class CodeReviewConfig {
 
     public void setApiHost(String apiHost) {
         this.apiHost = apiHost;
+    }
+
+    public String getApiProtocol() {
+        return apiProtocol;
+    }
+
+    public void setApiProtocol(String apiProtocol) {
+        this.apiProtocol = apiProtocol;
     }
 
     public String getApiKey() {

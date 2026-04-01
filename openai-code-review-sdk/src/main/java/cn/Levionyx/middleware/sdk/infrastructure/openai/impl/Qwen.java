@@ -15,26 +15,28 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
- * 阿里云百炼平台 GLM 模型实现
- * OpenAI 兼容 API 地址: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+ * 阿里云百炼 Qwen 模型实现
+ * 使用 codingplan 专用 API: https://coding.dashscope.aliyuncs.com/v1/chat/completions
  *
- * 注意：智谱 GLM 模型通过阿里云百炼平台代理调用
- * codingplan 专用 API (coding.dashscope.aliyuncs.com) 仅支持 qwen 系列模型
+ * codingplan 是阿里云灵码服务，专门用于代码相关任务
+ * 支持 qwen-turbo, qwen-plus, qwen-max, qwen-coder-plus 等模型
  */
-public class GLM implements IOpenAI {
+public class Qwen implements IOpenAI {
 
-    // 阿里云百炼 OpenAI 兼容 API 地址
-    private static final String DEFAULT_API_HOST = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+    // 阿里云灵码 codingplan 专用 API 地址
+    private static final String DEFAULT_API_HOST = "https://coding.dashscope.aliyuncs.com/v1/chat/completions";
 
     private final String apiHost;
     private final String apiKey;
 
-    public GLM(String apiKey) {
+    private static final Logger logger = LoggerFactory.getLogger(Qwen.class);
+
+    public Qwen(String apiKey) {
         this.apiHost = DEFAULT_API_HOST;
         this.apiKey = apiKey;
     }
 
-    public GLM(String apiHost, String apiKey) {
+    public Qwen(String apiHost, String apiKey) {
         this.apiHost = apiHost;
         this.apiKey = apiKey;
     }
@@ -49,7 +51,7 @@ public class GLM implements IOpenAI {
         connection.setDoOutput(true);
 
         String requestBody = JSON.toJSONString(requestDTO);
-        logger.debug("GLM API 请求: {}", requestBody);
+        logger.debug("Qwen API 请求: {}", requestBody);
 
         try (OutputStream os = connection.getOutputStream()) {
             byte[] input = requestBody.getBytes(StandardCharsets.UTF_8);
@@ -58,10 +60,9 @@ public class GLM implements IOpenAI {
 
         int responseCode = connection.getResponseCode();
         if (responseCode != 200) {
-            // 读取错误响应
             String errorResponse = readErrorResponse(connection);
-            logger.error("GLM API 错误响应 [{}]: {}", responseCode, errorResponse);
-            throw new RuntimeException("GLM API 调用失败 [" + responseCode + "]: " + errorResponse);
+            logger.error("Qwen API 错误响应 [{}]: {}", responseCode, errorResponse);
+            throw new RuntimeException("Qwen API 调用失败 [" + responseCode + "]: " + errorResponse);
         }
 
         try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
@@ -88,6 +89,4 @@ public class GLM implements IOpenAI {
             return "无法读取错误响应: " + e.getMessage();
         }
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(GLM.class);
 }
