@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -24,6 +25,11 @@ public abstract class AbstractOpenAI implements IOpenAI {
     protected static final String CHAT_COMPLETIONS_PATH = "/chat/completions";
     protected static final String PATH_SUFFIX = "chat/completions";
 
+    /** 连接超时时间（毫秒） */
+    protected static final int CONNECT_TIMEOUT = 30000;
+    /** 读取超时时间（毫秒） */
+    protected static final int READ_TIMEOUT = 60000;
+
     protected final String apiHost;
     protected final String apiKey;
 
@@ -35,7 +41,12 @@ public abstract class AbstractOpenAI implements IOpenAI {
     }
 
     protected AbstractOpenAI(String defaultApiHost, String apiHost, String apiKey) {
-        this.apiHost = normalizeApiHost(apiHost, defaultApiHost);
+        this.apiHost = normalizeApiHost(apiHost, defaultApiHost, CHAT_COMPLETIONS_PATH);
+        this.apiKey = apiKey;
+    }
+
+    protected AbstractOpenAI(String defaultApiHost, String apiHost, String apiKey, String apiPath) {
+        this.apiHost = normalizeApiHost(apiHost, defaultApiHost, apiPath);
         this.apiKey = apiKey;
     }
 
@@ -45,32 +56,33 @@ public abstract class AbstractOpenAI implements IOpenAI {
      *
      * @param host 用户配置的 API Host
      * @param defaultHost 默认 API Host
+     * @param apiPath API 路径（如 /chat/completions 或 /v1/messages）
      * @return 规范化后的完整 API 地址
      */
-    protected String normalizeApiHost(String host, String defaultHost) {
+    protected String normalizeApiHost(String host, String defaultHost, String apiPath) {
         if (host == null || host.isEmpty()) {
             logger.warn("API_HOST 未配置，使用默认地址: {}", defaultHost);
             return defaultHost;
         }
 
         // 如果已经包含完整路径，直接返回
-        if (host.contains(CHAT_COMPLETIONS_PATH)) {
+        if (host.contains(apiPath)) {
             return host;
         }
 
         try {
-            // 使用 URI 进行安全的路径拼接
-            URI uri = URI.create(host);
+            // 使用 new URI 而非 URI.create，安全处理非法字符
+            URI uri = new URI(host);
             String path = uri.getPath();
 
             // 处理路径拼接
             String newPath;
-            if (path == null || path.isEmpty()) {
-                newPath = CHAT_COMPLETIONS_PATH;
+            if (path == null || path.isEmpty() || path.equals("/")) {
+                newPath = apiPath;
             } else if (path.endsWith("/")) {
-                newPath = path + PATH_SUFFIX;
+                newPath = path + apiPath.substring(1);  // 移除开头的 /
             } else {
-                newPath = path + CHAT_COMPLETIONS_PATH;
+                newPath = path + apiPath;
             }
 
             // 重建 URI，保留查询参数
@@ -85,13 +97,13 @@ public abstract class AbstractOpenAI implements IOpenAI {
             );
 
             return normalizedUri.toString();
+        } catch (URISyntaxException e) {
+            // URI 解析失败，记录错误并返回默认地址
+            logger.error("无效的 API_HOST 格式: {}, 错误: {}", host, e.getMessage());
+            return defaultHost;
         } catch (Exception e) {
-            // 如果 URI 解析失败，使用简单的字符串拼接
-            logger.warn("API_HOST 解析失败，使用简单拼接: {}", e.getMessage());
-            if (host.endsWith("/")) {
-                return host + PATH_SUFFIX;
-            }
-            return host + CHAT_COMPLETIONS_PATH;
+            logger.warn("API_HOST 解析失败，使用默认地址: {}", e.getMessage());
+            return defaultHost;
         }
     }
 
@@ -104,7 +116,7 @@ public abstract class AbstractOpenAI implements IOpenAI {
             setupConnection(connection);
 
             String requestBody = JSON.toJSONString(requestDTO);
-            logger.debug("API 请求: host={}, body={}", apiHost, requestBody);
+            logger.debug("API 请求: host={}", apiHost);
 
             // 发送请求
             try (OutputStream os = connection.getOutputStream()) {
@@ -136,6 +148,8 @@ public abstract class AbstractOpenAI implements IOpenAI {
         connection.setRequestProperty("Authorization", "Bearer " + apiKey);
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoOutput(true);
+        connection.setConnectTimeout(CONNECT_TIMEOUT);
+        connection.setReadTimeout(READ_TIMEOUT);
     }
 
     /**

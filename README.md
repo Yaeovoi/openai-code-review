@@ -27,6 +27,7 @@
 | GPT-4-turbo | `gpt-4-turbo` | openai | OpenAI |
 | DeepSeek-Chat | `deepseek-chat` | deepseek | DeepSeek |
 | DeepSeek-Coder | `deepseek-coder` | deepseek | DeepSeek |
+| DeepSeek-Reasoner | `deepseek-reasoner` | deepseek | DeepSeek R1（含推理功能） |
 | Claude-3-Opus | `claude-3-opus` | anthropic | Anthropic（需设置 API_PROTOCOL=anthropic） |
 | Claude-3-Sonnet | `claude-3-sonnet` | anthropic | Anthropic（需设置 API_PROTOCOL=anthropic） |
 | Claude-3-Haiku | `claude-3-haiku` | anthropic | Anthropic（需设置 API_PROTOCOL=anthropic） |
@@ -265,4 +266,48 @@ new CodeReviewRunner(config).run();
 
 ## 许可证
 
-MIT License .. test 01
+MIT License
+
+## 变更日志
+
+### V1.6 (2026-04-01)
+
+**架构优化**
+- 新增 `AbstractOpenAI` 抽象基类，消除 GLM、Qwen、OpenAI、DeepSeek 等实现类的重复代码
+- 重构 `Anthropic` 类继承抽象基类，统一架构设计
+
+**安全性增强**
+- URL 解析使用 `URISyntaxException` 安全处理非法字符
+- 移除日志中的敏感请求体信息，防止信息泄露
+
+**健壮性改进**
+- 添加 HTTP 连接超时配置（连接 30s，读取 60s）
+- 增强空值安全检查，防止 NPE
+- API_HOST 未配置或解析失败时，输出警告日志并回退到默认地址
+
+**代码清理**
+- 合并 `Model.java` 到 `ChatModel.java`，消除重复枚举
+- 清理未使用的方法
+- 统一日志级别
+
+**破坏性变更**
+- 默认模型从 `deepseek-chat` 改为 `qwen-coder-plus`
+- 删除 `Model.java` 枚举类（如外部有引用需迁移到 `ChatModel`）
+
+### V1.5 (2026-04-01)
+- 自动补全 API_HOST 路径，支持不完整的地址
+
+### V1.4 (2026-04-01)
+- 修复模型选择逻辑，支持用户自定义任意模型
+
+### V1.3 (2026-04-01)
+- 修复 Qwen API 地址问题
+
+### V1.2 (2026-04-01)
+- 支持 Anthropic 协议
+
+### V1.1 (2026-04-01)
+- 支持自定义模型和 API 地址
+
+### V1.0
+- 初始版本
