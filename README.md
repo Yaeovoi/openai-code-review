@@ -265,4 +265,4 @@ new CodeReviewRunner(config).run();
 
 ## 许可证
 
-MIT License
+MIT License .. test
