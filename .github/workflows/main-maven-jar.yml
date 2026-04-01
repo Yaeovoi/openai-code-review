@@ -67,6 +67,8 @@ jobs:
           FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
           FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
           FEISHU_CHAT_ID: ${{ secrets.FEISHU_CHAT_ID }}
-          # 阿里云百炼 GLM 配置 「https://bailian.console.aliyun.com/」
-          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
-          GLM_MODEL: ${{ secrets.GLM_MODEL }}
+          # AI 模型配置
+          API_KEY: ${{ secrets.API_KEY }}
+          CHAT_MODEL: ${{ secrets.CHAT_MODEL }}
+          API_HOST: ${{ secrets.API_HOST }}
+          API_PROTOCOL: ${{ secrets.API_PROTOCOL }}
