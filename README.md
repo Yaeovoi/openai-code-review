@@ -114,7 +114,7 @@ jobs:
       - name: Download Code Review SDK
         run: |
           mkdir -p ./libs
-          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.10/openai-code-review-sdk-1.0.jar
+          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.11/openai-code-review-sdk-1.0.jar
 
       - name: Get commit info
         run: |
@@ -231,6 +231,9 @@ env:
 MIT License
 
 ## 变更日志
+
+### V1.11 (2026-04-02)
+- **通知消息增加提交信息** - 飞书/钉钉/企业微信通知卡片新增"提交"字段，显示 commit message
 
 ### V1.10 (2026-04-01)
 - **可配置超时时间** - 新增 `API_TIMEOUT` 环境变量，用户可自定义 AI 模型 API 调用的超时时间（单位：秒，默认 180 秒）
