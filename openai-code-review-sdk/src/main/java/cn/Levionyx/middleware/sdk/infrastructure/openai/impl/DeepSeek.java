@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 public class DeepSeek implements IOpenAI {
 
     private static final String DEFAULT_API_HOST = "https://api.deepseek.com/v1/chat/completions";
+    private static final String CHAT_COMPLETIONS_PATH = "/chat/completions";
 
     private final String apiHost;
     private final String apiKey;
@@ -30,8 +31,26 @@ public class DeepSeek implements IOpenAI {
     }
 
     public DeepSeek(String apiHost, String apiKey) {
-        this.apiHost = apiHost;
+        this.apiHost = normalizeApiHost(apiHost);
         this.apiKey = apiKey;
+    }
+
+    /**
+     * 规范化 API Host 地址
+     * 如果地址不包含 /chat/completions，自动补全
+     */
+    private String normalizeApiHost(String host) {
+        if (host == null || host.isEmpty()) {
+            return DEFAULT_API_HOST;
+        }
+        if (host.endsWith(CHAT_COMPLETIONS_PATH)) {
+            return host;
+        }
+        // 补全路径
+        if (host.endsWith("/")) {
+            return host + "chat/completions";
+        }
+        return host + CHAT_COMPLETIONS_PATH;
     }
 
     @Override
