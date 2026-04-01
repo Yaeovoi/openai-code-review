@@ -90,10 +90,18 @@ public class CodeReviewRunner {
 
         ChatCompletionSyncResponseDTO response = chatModel.completions(request);
 
-        if (response.getChoices() != null && !response.getChoices().isEmpty()) {
-            return response.getChoices().get(0).getMessage().getContent();
+        // 安全地提取响应内容
+        if (response != null && response.getChoices() != null && !response.getChoices().isEmpty()) {
+            ChatCompletionSyncResponseDTO.Choice choice = response.getChoices().get(0);
+            if (choice != null && choice.getMessage() != null) {
+                String content = choice.getMessage().getContent();
+                if (content != null && !content.isEmpty()) {
+                    return content;
+                }
+            }
         }
 
+        logger.warn("AI 模型返回空响应，返回默认消息");
         return "代码审查完成，但未获取到具体建议。";
     }
 

@@ -168,7 +168,7 @@ public class FeiShu {
             // 应用 API: content 直接是卡片 JSON 字符串
             body.put("content", card.toJSONString());
 
-            logger.info("发送飞书消息, 请求体: {}", body.toJSONString());
+            logger.debug("发送飞书消息, chatId: {}", chatId);
 
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(body.toJSONString().getBytes(StandardCharsets.UTF_8));
@@ -257,55 +257,11 @@ public class FeiShu {
         }
     }
 
-    private JSONObject createFieldElement(String label, String value) {
-        JSONObject element = new JSONObject();
-        element.put("tag", "div");
-        JSONObject text = new JSONObject();
-        text.put("tag", "plain_text");
-        text.put("content", label + ": " + sanitize(value));
-        element.put("text", text);
-        return element;
-    }
-
     /**
-     * 清理文本中的特殊字符，只保留基本内容
+     * 清理文本中的特殊字符，防止飞书卡片解析错误
      */
     private String sanitize(String text) {
         if (text == null) return "";
-        // 移除可能导致问题的特殊字符，只保留基本字符
         return text.replaceAll("[<>]", "");
-    }
-
-    /**
-     * 对 URL 进行编码，处理空格和特殊字符
-     */
-    private String encodeUrl(String url) {
-        if (url == null) return "";
-        try {
-            // 只编码 URL 中的文件名部分（路径最后一段）
-            int lastSlash = url.lastIndexOf('/');
-            if (lastSlash > 0) {
-                String baseUrl = url.substring(0, lastSlash + 1);
-                String fileName = url.substring(lastSlash + 1);
-                return baseUrl + URLEncoder.encode(fileName, StandardCharsets.UTF_8.name()).replace("+", "%20");
-            }
-            return url;
-        } catch (Exception e) {
-            logger.error("URL 编码失败", e);
-            return url;
-        }
-    }
-
-    private JSONObject createTextContent(String text) {
-        JSONObject result = new JSONObject();
-        result.put("tag", "plain_text");
-        result.put("content", text);
-        return result;
-    }
-
-    private String truncate(String str, int maxLen) {
-        if (str == null) return "";
-        if (str.length() <= maxLen) return str;
-        return str.substring(0, maxLen) + "...";
     }
 }

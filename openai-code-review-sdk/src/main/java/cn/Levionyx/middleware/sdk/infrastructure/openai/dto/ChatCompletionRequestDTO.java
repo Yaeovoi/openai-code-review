@@ -1,15 +1,20 @@
 package cn.Levionyx.middleware.sdk.infrastructure.openai.dto;
 
-
-import cn.Levionyx.middleware.sdk.domain.model.Model;
+import cn.Levionyx.middleware.sdk.domain.model.ChatModel;
 
 import java.util.List;
 
+/**
+ * OpenAI Chat Completions API 请求 DTO
+ */
 public class ChatCompletionRequestDTO {
 
-    private String model = Model.DEEPSEEK_V3.getCode();
+    private String model = ChatModel.QWEN_CODER_PLUS.getCode();
     private List<Prompt> messages;
 
+    /**
+     * 提示消息
+     */
     public static class Prompt {
         private String role;
         private String content;
@@ -37,7 +42,6 @@ public class ChatCompletionRequestDTO {
         public void setContent(String content) {
             this.content = content;
         }
-
     }
 
     public String getModel() {

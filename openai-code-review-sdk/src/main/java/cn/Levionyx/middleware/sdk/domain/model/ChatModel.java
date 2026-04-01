@@ -25,7 +25,8 @@ public enum ChatModel {
 
     // DeepSeek 系列
     DEEPSEEK_CHAT("deepseek-chat", "deepseek", "DeepSeek Chat"),
-    DEEPSEEK_CODER("deepseek-coder", "deepseek", "DeepSeek Coder");
+    DEEPSEEK_CODER("deepseek-coder", "deepseek", "DeepSeek Coder"),
+    DEEPSEEK_REASONER("deepseek-reasoner", "deepseek", "DeepSeek R1（含推理功能）");
 
     private final String code;
     private final String provider;

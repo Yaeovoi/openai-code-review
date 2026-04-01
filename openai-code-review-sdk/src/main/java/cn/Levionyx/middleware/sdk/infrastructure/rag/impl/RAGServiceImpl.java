@@ -1,6 +1,6 @@
 package cn.Levionyx.middleware.sdk.infrastructure.rag.impl;
 
-import cn.Levionyx.middleware.sdk.domain.model.Model;
+import cn.Levionyx.middleware.sdk.domain.model.ChatModel;
 import cn.Levionyx.middleware.sdk.infrastructure.openai.IOpenAI;
 import cn.Levionyx.middleware.sdk.infrastructure.openai.dto.ChatCompletionRequestDTO;
 import cn.Levionyx.middleware.sdk.infrastructure.openai.dto.ChatCompletionSyncResponseDTO;
@@ -26,7 +26,7 @@ public class RAGServiceImpl implements IRAGService {
      */
     public RAGServiceImpl(IOpenAI openAI) {
         this.openAI = openAI;
-        this.model = Model.GLM_4.getCode();
+        this.model = ChatModel.GLM_4_FLASH.getCode();
     }
 
     /**
@@ -74,11 +74,16 @@ public class RAGServiceImpl implements IRAGService {
         ChatCompletionSyncResponseDTO response = openAI.completions(requestDTO);
 
         // 提取评审结果
-        if (response.getChoices() != null && !response.getChoices().isEmpty()) {
-            String content = response.getChoices().get(0).getMessage().getContent();
-            logger.info("代码评审完成");
-            logger.info("评审结果: {}", content);
-            return content;
+        if (response != null && response.getChoices() != null && !response.getChoices().isEmpty()) {
+            ChatCompletionSyncResponseDTO.Choice choice = response.getChoices().get(0);
+            if (choice != null && choice.getMessage() != null) {
+                String content = choice.getMessage().getContent();
+                if (content != null && !content.isEmpty()) {
+                    logger.info("代码评审完成");
+                    logger.debug("评审结果: {}", content);
+                    return content;
+                }
+            }
         }
 
         logger.warn("未获取到评审结果");
