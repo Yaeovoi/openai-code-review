@@ -114,7 +114,7 @@ jobs:
       - name: Download Code Review SDK
         run: |
           mkdir -p ./libs
-          wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/Yaeovoi/openai-code-review/releases/download/V1.12/openai-code-review-sdk-1.0.jar
+          wget -O ./libs/openai-code-review-sdk.jar https://github.com/Yaeovoi/openai-code-review/releases/latest/download/openai-code-review-sdk-1.0.jar
 
       - name: Get commit info
         run: |
