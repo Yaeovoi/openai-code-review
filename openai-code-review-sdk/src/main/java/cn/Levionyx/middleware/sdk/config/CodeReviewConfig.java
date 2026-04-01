@@ -1,7 +1,5 @@
 package cn.Levionyx.middleware.sdk.config;
 
-import cn.Levionyx.middleware.sdk.domain.model.ChatModel;
-
 /**
  * 代码审查配置类
  */
@@ -16,7 +14,7 @@ public class CodeReviewConfig {
     private String message;
 
     // ========== AI 模型配置 ==========
-    private ChatModel chatModel = ChatModel.QWEN_CODER_PLUS;
+    private String chatModelCode;  // 用户配置的原始模型代码
     private String apiHost;  // 可选，自定义 API 地址
     private String apiProtocol;  // 可选，API 协议：openai 或 anthropic
     private String apiKey;
@@ -218,12 +216,12 @@ public class CodeReviewConfig {
         this.message = message;
     }
 
-    public ChatModel getChatModel() {
-        return chatModel;
+    public String getChatModelCode() {
+        return chatModelCode;
     }
 
-    public void setChatModel(ChatModel chatModel) {
-        this.chatModel = chatModel;
+    public void setChatModelCode(String chatModelCode) {
+        this.chatModelCode = chatModelCode;
     }
 
     public String getApiHost() {

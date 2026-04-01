@@ -2,7 +2,6 @@ package cn.Levionyx.middleware.sdk;
 
 import cn.Levionyx.middleware.sdk.config.CodeReviewConfig;
 import cn.Levionyx.middleware.sdk.config.CodeReviewConfigBuilder;
-import cn.Levionyx.middleware.sdk.domain.model.ChatModel;
 import cn.Levionyx.middleware.sdk.infrastructure.git.GitCommand;
 import cn.Levionyx.middleware.sdk.infrastructure.notification.INotification;
 import cn.Levionyx.middleware.sdk.infrastructure.notification.impl.DingTalkNotification;
@@ -71,7 +70,7 @@ public class CodeReviewRunner {
      */
     private String review(String diffCode) throws Exception {
         ChatCompletionRequestDTO request = new ChatCompletionRequestDTO();
-        request.setModel(config.getChatModel().getCode());
+        request.setModel(config.getChatModelCode());  // 直接使用用户配置的模型代码
 
         List<ChatCompletionRequestDTO.Prompt> messages = new ArrayList<>();
 
@@ -116,15 +115,17 @@ public class CodeReviewRunner {
      * 创建 AI 模型
      */
     private IOpenAI createChatModel() {
-        ChatModel model = config.getChatModel();
+        String modelCode = config.getChatModelCode();
         String apiHost = config.getApiHost();
         String apiKey = config.getApiKey();
         String protocol = config.getApiProtocol();
 
-        if (apiHost != null && !apiHost.isEmpty()) {
-            return ChatModelFactory.create(model, apiHost, apiKey, protocol);
-        }
-        return ChatModelFactory.create(model, apiKey, protocol);
+        logger.info("创建 AI 模型: modelCode={}, apiHost={}, protocol={}",
+            modelCode,
+            apiHost != null ? "已配置" : "使用默认",
+            protocol);
+
+        return ChatModelFactory.create(modelCode, apiHost, apiKey, protocol);
     }
 
     /**

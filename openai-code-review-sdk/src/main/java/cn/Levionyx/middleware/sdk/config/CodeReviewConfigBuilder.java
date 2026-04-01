@@ -1,7 +1,5 @@
 package cn.Levionyx.middleware.sdk.config;
 
-import cn.Levionyx.middleware.sdk.domain.model.ChatModel;
-
 /**
  * 配置构建器 - 流式 API 构建配置
  */
@@ -30,18 +28,10 @@ public class CodeReviewConfigBuilder {
     }
 
     /**
-     * 设置 AI 模型
-     */
-    public CodeReviewConfigBuilder model(ChatModel model) {
-        config.setChatModel(model);
-        return this;
-    }
-
-    /**
-     * 设置 AI 模型（通过代码）
+     * 设置 AI 模型代码
      */
     public CodeReviewConfigBuilder model(String modelCode) {
-        config.setChatModel(ChatModel.fromCode(modelCode));
+        config.setChatModelCode(modelCode);
         return this;
     }
 
@@ -184,10 +174,12 @@ public class CodeReviewConfigBuilder {
         config.setMessage(getEnv("COMMIT_MESSAGE"));
 
         // AI 模型配置
+        // 用户配置了 CHAT_MODEL 就用用户的，否则用默认值
         String modelCode = getEnvOrDefault("CHAT_MODEL", "qwen-coder-plus");
-        config.setChatModel(ChatModel.fromCode(modelCode));
+        config.setChatModelCode(modelCode);
         config.setApiHost(getEnvOrDefault("API_HOST", null));
-        config.setApiProtocol(getEnvOrDefault("API_PROTOCOL", "openai"));  // 默认 openai 协议
+        config.setApiProtocol(getEnvOrDefault("API_PROTOCOL", "openai"));
+
         // 支持 API_KEY 或 GLM_API_KEY（向后兼容）
         String apiKey = getEnvOrDefault("API_KEY", null);
         if (apiKey == null) {

@@ -51,19 +51,71 @@ public enum ChatModel {
 
     /**
      * 根据模型代码查找枚举
+     * 如果找不到，返回 null（由调用方决定如何处理）
      */
     public static ChatModel fromCode(String code) {
         if (code == null || code.isEmpty()) {
-            logger.warn("模型代码为空，使用默认模型: {}", QWEN_CODER_PLUS.getCode());
-            return QWEN_CODER_PLUS;
+            return null;
         }
         for (ChatModel model : values()) {
             if (model.code.equalsIgnoreCase(code)) {
                 return model;
             }
         }
-        logger.warn("未找到模型代码 [{}]，使用默认模型: {}", code, QWEN_CODER_PLUS.getCode());
-        return QWEN_CODER_PLUS;
+        return null;  // 找不到返回 null，不强制使用默认值
+    }
+
+    /**
+     * 根据模型代码查找枚举，找不到时返回默认值
+     * 仅在用户未配置 CHAT_MODEL 时使用
+     */
+    public static ChatModel fromCodeOrDefault(String code) {
+        if (code == null || code.isEmpty()) {
+            logger.info("未配置模型，使用默认模型: {}", QWEN_CODER_PLUS.getCode());
+            return QWEN_CODER_PLUS;
+        }
+        ChatModel model = fromCode(code);
+        if (model == null) {
+            logger.info("模型 [{}] 不在预定义列表中，将使用用户配置的 API_HOST 或默认 OpenAI 协议", code);
+        }
+        return model;
+    }
+
+    /**
+     * 根据模型代码推断 provider
+     * 用于选择对应的实现类
+     */
+    public static String inferProvider(String modelCode) {
+        if (modelCode == null || modelCode.isEmpty()) {
+            return "qwen";  // 默认 provider
+        }
+
+        // 先在枚举中查找
+        ChatModel model = fromCode(modelCode);
+        if (model != null) {
+            return model.getProvider();
+        }
+
+        // 根据模型名称前缀推断
+        String lowerCode = modelCode.toLowerCase();
+        if (lowerCode.startsWith("qwen")) {
+            return "qwen";
+        }
+        if (lowerCode.startsWith("glm")) {
+            return "glm";
+        }
+        if (lowerCode.startsWith("gpt") || lowerCode.startsWith("o1") || lowerCode.startsWith("o3")) {
+            return "openai";
+        }
+        if (lowerCode.startsWith("deepseek")) {
+            return "deepseek";
+        }
+        if (lowerCode.startsWith("claude")) {
+            return "anthropic";
+        }
+
+        // 默认使用 openai 协议
+        return "openai";
     }
 
     private static final Logger logger = LoggerFactory.getLogger(ChatModel.class);

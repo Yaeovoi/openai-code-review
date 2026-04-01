@@ -16,15 +16,16 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * 阿里云百炼 Qwen 模型实现
- * 使用 codingplan 专用 API: https://coding.dashscope.aliyuncs.com/v1/chat/completions
+ * API 文档: https://help.aliyun.com/zh/model-studio/developer-reference/use-qwen-by-calling-api
  *
- * codingplan 是阿里云灵码服务，专门用于代码相关任务
- * 支持 qwen-turbo, qwen-plus, qwen-max, qwen-coder-plus 等模型
+ * 支持两种 API 地址：
+ * 1. 百炼 OpenAI 兼容 API（默认）: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+ * 2. 灵码 codingplan API: https://coding.dashscope.aliyuncs.com/v1/chat/completions
  */
 public class Qwen implements IOpenAI {
 
-    // 阿里云灵码 codingplan 专用 API 地址
-    private static final String DEFAULT_API_HOST = "https://coding.dashscope.aliyuncs.com/v1/chat/completions";
+    // 阿里云百炼 OpenAI 兼容 API 地址（默认）
+    private static final String DEFAULT_API_HOST = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
 
     private final String apiHost;
     private final String apiKey;
@@ -78,13 +79,18 @@ public class Qwen implements IOpenAI {
     }
 
     private String readErrorResponse(HttpURLConnection connection) {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
-            String inputLine;
-            StringBuilder content = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
+        try {
+            if (connection.getErrorStream() == null) {
+                return "无错误响应内容 (可能请求未到达服务器或网络问题)";
             }
-            return content.toString();
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                return content.toString();
+            }
         } catch (Exception e) {
             return "无法读取错误响应: " + e.getMessage();
         }
