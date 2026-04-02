@@ -44,7 +44,8 @@ public class OpenAiCodeReview {
         IOpenAI openAI = new GLM(glmApiHost, glmApiKey);
         IRAGService ragService = new RAGServiceImpl(openAI, glmModel);
 
-        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, feiShu, ragService);
+        // 使用新的构造器，传入 null 作为 notification 参数（兼容旧代码）
+        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, feiShu, null, ragService);
         openAiCodeReviewService.exec();
 
         logger.info("glm-code-review done!");
