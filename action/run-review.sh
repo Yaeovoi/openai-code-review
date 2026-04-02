@@ -11,17 +11,11 @@ VERSION_FILE="${CACHE_DIR}/.version"
 CHECKSUM_FILE="${CACHE_DIR}/.checksum"
 JAR_URL="https://github.com/Yaeovoi/openai-code-review/releases/latest/download/openai-code-review-sdk.jar"
 CHECKSUM_URL="https://github.com/Yaeovoi/openai-code-review/releases/latest/download/openai-code-review-sdk.jar.sha256"
-RELEASE_API="https://api.github.com/repos/Yaeovoi/openai-code-review/releases/latest"
 
 # 创建缓存目录
 mkdir -p "${CACHE_DIR}"
 
-# 获取最新版本号
-get_latest_version() {
-    curl -s --connect-timeout 10 "${RELEASE_API}" | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/'
-}
-
-# 下载文件（带进度显示）
+# 下载文件
 download_file() {
     local url="$1"
     local output="$2"
@@ -55,31 +49,32 @@ verify_checksum() {
 }
 
 # 主逻辑：检查并下载 JAR
+# 版本号通过环境变量 JAR_VERSION 传入（由 action.yml 获取）
 download_and_verify_jar() {
     local need_download=false
-    local latest_tag=""
+    local latest_tag="${JAR_VERSION:-unknown}"
 
     # 检查缓存是否存在
     if [ ! -f "${JAR_FILE}" ]; then
         echo "缓存不存在，需要下载 JAR..."
         need_download=true
     else
-        echo "发现缓存 JAR，检查是否有新版本..."
+        echo "发现缓存 JAR，检查版本..."
 
-        latest_tag=$(get_latest_version)
-
-        if [ -z "${latest_tag}" ]; then
-            echo "警告：无法获取最新版本信息，使用缓存版本"
-            return 0
-        fi
-
+        # 读取缓存的版本
         local cached_tag=""
         if [ -f "${VERSION_FILE}" ]; then
             cached_tag=$(cat "${VERSION_FILE}")
         fi
 
         echo "缓存版本: ${cached_tag:-未知}"
-        echo "最新版本: ${latest_tag}"
+        echo "目标版本: ${latest_tag}"
+
+        # 如果版本号未知，使用缓存
+        if [ "${latest_tag}" = "unknown" ]; then
+            echo "警告：无法确定最新版本，使用缓存"
+            return 0
+        fi
 
         if [ "${cached_tag}" != "${latest_tag}" ]; then
             echo "发现新版本，需要更新..."
@@ -109,8 +104,8 @@ download_and_verify_jar() {
             exit 1
         fi
 
-        # SHA256 校验
-        if [ -f "${tmp_checksum}" ]; then
+        # SHA256 校验（必须成功）
+        if [ -f "${tmp_checksum}" ] && [ -s "${tmp_checksum}" ]; then
             local expected_checksum=$(cat "${tmp_checksum}" | tr -d ' ')
             if ! verify_checksum "${tmp_jar}" "${expected_checksum}"; then
                 rm -f "${tmp_jar}" "${tmp_checksum}"
@@ -118,7 +113,9 @@ download_and_verify_jar() {
             fi
             mv "${tmp_checksum}" "${CHECKSUM_FILE}"
         else
-            echo "警告：未找到 checksum 文件，跳过校验（不推荐）"
+            echo "错误：SHA256 checksum 文件下载失败，拒绝执行"
+            rm -f "${tmp_jar}" "${tmp_checksum}"
+            exit 1
         fi
 
         # 移动文件到最终位置

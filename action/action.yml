@@ -72,7 +72,7 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
-    # 2. 获取最新版本号（用于缓存 key）
+    # 2. 获取最新版本号（用于缓存 key 和脚本）
     - name: Get latest version
       id: get-version
       shell: bash
@@ -81,6 +81,7 @@ runs:
         VERSION=$(curl -s --connect-timeout 10 "${RELEASE_API}" | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')
         if [ -z "${VERSION}" ]; then
           VERSION="unknown"
+          echo "警告：无法获取最新版本信息"
         fi
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "Latest version: ${VERSION}"
@@ -98,12 +99,17 @@ runs:
     - name: Run Code Review
       shell: bash
       env:
+        # 版本号（由上一步获取，避免重复 API 调用）
+        JAR_VERSION: ${{ steps.get-version.outputs.version }}
+        # GitHub 配置
         GITHUB_TOKEN: ${{ inputs.github-token }}
         GITHUB_REVIEW_LOG_URI: ${{ inputs.review-log-uri }}
+        # AI 模型配置
         CHAT_MODEL: ${{ inputs.chat-model }}
         API_KEY: ${{ inputs.api-key }}
         API_HOST: ${{ inputs.api-host }}
         API_PROTOCOL: ${{ inputs.api-protocol }}
+        # 通知配置
         NOTIFICATION_CHANNEL: ${{ inputs.notification-channel }}
         FEISHU_APP_ID: ${{ inputs.feishu-app-id }}
         FEISHU_APP_SECRET: ${{ inputs.feishu-app-secret }}
@@ -112,5 +118,4 @@ runs:
         WECOM_WEBHOOK: ${{ inputs.wecom-webhook }}
         CUSTOM_PROMPT: ${{ inputs.custom-prompt }}
       run: |
-        chmod +x ${{ github.action_path }}/run-review.sh
         ${{ github.action_path }}/run-review.sh
