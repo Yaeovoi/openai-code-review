@@ -65,80 +65,36 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # 1. 确保 Java 环境可用
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    # 2. 获取最新版本号（用于缓存 key）
+    - name: Get latest version
+      id: get-version
+      shell: bash
+      run: |
+        RELEASE_API="https://api.github.com/repos/Yaeovoi/openai-code-review/releases/latest"
+        VERSION=$(curl -s --connect-timeout 10 "${RELEASE_API}" | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')
+        if [ -z "${VERSION}" ]; then
+          VERSION="unknown"
+        fi
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Latest version: ${VERSION}"
+
+    # 3. 设置缓存（基于版本号）
     - name: Setup cache for JAR
       uses: actions/cache@v4
       with:
         path: ~/.cache/openai-code-review
-        key: openai-code-review-jar-${{ hashFiles('**/.version') }}
+        key: openai-code-review-jar-${{ steps.get-version.outputs.version }}
         restore-keys: |
           openai-code-review-jar-
 
-    - name: Download JAR if needed
-      shell: bash
-      run: |
-        CACHE_DIR="${HOME}/.cache/openai-code-review"
-        JAR_FILE="${CACHE_DIR}/openai-code-review-sdk.jar"
-        VERSION_FILE="${CACHE_DIR}/.version"
-        JAR_URL="https://github.com/Yaeovoi/openai-code-review/releases/latest/download/openai-code-review-sdk.jar"
-        RELEASE_API="https://api.github.com/repos/Yaeovoi/openai-code-review/releases/latest"
-
-        mkdir -p "${CACHE_DIR}"
-
-        need_download=false
-        latest_tag=""
-
-        if [ ! -f "${JAR_FILE}" ]; then
-          echo "缓存不存在，需要下载 JAR..."
-          need_download=true
-        else
-          echo "发现缓存 JAR，检查是否有新版本..."
-
-          latest_tag=$(curl -s --connect-timeout 10 "${RELEASE_API}" | grep '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')
-
-          if [ -z "${latest_tag}" ]; then
-            echo "警告：无法获取最新版本信息，使用缓存版本"
-            exit 0
-          fi
-
-          cached_tag=""
-          if [ -f "${VERSION_FILE}" ]; then
-            cached_tag=$(cat "${VERSION_FILE}")
-          fi
-
-          echo "缓存版本: ${cached_tag:-未知}"
-          echo "最新版本: ${latest_tag}"
-
-          if [ "${cached_tag}" != "${latest_tag}" ]; then
-            echo "发现新版本，需要更新..."
-            need_download=true
-          else
-            echo "已是最新版本，使用缓存"
-            exit 0
-          fi
-        fi
-
-        if [ "${need_download}" = true ]; then
-          echo "正在下载 JAR: ${JAR_URL}"
-
-          tmp_file="${JAR_FILE}.tmp"
-          if curl -sL --connect-timeout 30 --max-time 300 -o "${tmp_file}" "${JAR_URL}"; then
-            file_size=$(wc -c < "${tmp_file}" 2>/dev/null || echo 0)
-            if [ -f "${tmp_file}" ] && [ "${file_size}" -gt 1048576 ]; then
-              mv "${tmp_file}" "${JAR_FILE}"
-              echo "${latest_tag}" > "${VERSION_FILE}"
-              echo "JAR 下载成功，版本: ${latest_tag}"
-            else
-              echo "错误：下载的文件无效 (大小: ${file_size} bytes)"
-              rm -f "${tmp_file}"
-              exit 1
-            fi
-          else
-            echo "错误：JAR 下载失败"
-            rm -f "${tmp_file}"
-            exit 1
-          fi
-        fi
-
+    # 4. 运行代码审查脚本（包含下载、校验、执行）
     - name: Run Code Review
       shell: bash
       env:
@@ -156,37 +112,5 @@ runs:
         WECOM_WEBHOOK: ${{ inputs.wecom-webhook }}
         CUSTOM_PROMPT: ${{ inputs.custom-prompt }}
       run: |
-        echo "=== Code Review Action ==="
-        echo "Model: ${CHAT_MODEL:-qwen-coder-plus}"
-        echo "Notification Channel: ${NOTIFICATION_CHANNEL:-feishu}"
-
-        # 缓存目录
-        CACHE_DIR="${HOME}/.cache/openai-code-review"
-        JAR_FILE="${CACHE_DIR}/openai-code-review-sdk.jar"
-
-        # 获取提交信息
-        REPO_NAME="${GITHUB_REPOSITORY##*/}"
-        BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-        COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')
-        COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
-
-        echo "Repository: ${REPO_NAME}"
-        echo "Branch: ${BRANCH_NAME}"
-        echo "Author: ${COMMIT_AUTHOR}"
-
-        # 设置环境变量
-        export COMMIT_PROJECT="${REPO_NAME}"
-        export COMMIT_BRANCH="${BRANCH_NAME}"
-        export COMMIT_AUTHOR="${COMMIT_AUTHOR}"
-        export COMMIT_MESSAGE="${COMMIT_MESSAGE}"
-
-        # 兼容旧的环境变量名称（GLM_API_KEY -> API_KEY）
-        if [ -z "$API_KEY" ] && [ -n "$GLM_API_KEY" ]; then
-            export API_KEY="$GLM_API_KEY"
-            echo "使用兼容模式: GLM_API_KEY -> API_KEY"
-        fi
-
-        # 运行代码审查
-        java -jar "${JAR_FILE}"
-
-        echo "=== Code Review Complete ==="
+        chmod +x ${{ github.action_path }}/run-review.sh
+        ${{ github.action_path }}/run-review.sh
