@@ -8,6 +8,7 @@ import cn.Levionyx.middleware.sdk.domain.model.review.ReviewMetrics;
 import cn.Levionyx.middleware.sdk.infrastructure.git.GitCommand;
 import cn.Levionyx.middleware.sdk.infrastructure.github.GitHubPrComment;
 import cn.Levionyx.middleware.sdk.infrastructure.notification.INotification;
+import cn.Levionyx.middleware.sdk.infrastructure.notification.NotificationContentFormatter;
 import cn.Levionyx.middleware.sdk.infrastructure.notification.impl.DingTalkNotification;
 import cn.Levionyx.middleware.sdk.infrastructure.notification.impl.FeiShuNotification;
 import cn.Levionyx.middleware.sdk.infrastructure.notification.impl.WeComNotification;
@@ -72,7 +73,7 @@ public class CodeReviewRunner {
 
             // 5. 发送通知
             String commitUrl = buildCommitUrl(config.getRepo(), config.getCommitSha());
-            String shortSummary = formatShortSummary(result);
+            String shortSummary = NotificationContentFormatter.formatReviewSummary(result);
             notification.send(logUrl, config.getProject(), config.getBranch(), config.getAuthor(), config.getMessage(), commitUrl, shortSummary);
             logger.info("代码审查通知已发送");
 
@@ -376,36 +377,6 @@ public class CodeReviewRunner {
 
         sb.append("---\n");
         sb.append("*由 [openai-code-review](https://github.com/Yaeovoi/openai-code-review) 自动生成*\n");
-
-        return sb.toString();
-    }
-
-    /**
-     * 格式化简短摘要（用于通知）
-     */
-    private String formatShortSummary(CodeReviewResult result) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("**质量评分**: ").append(result.getQualityScore()).append("/100\n\n");
-
-        CodeReviewResult.Summary summary = result.getSummary();
-        if (summary.getTotalIssues() > 0) {
-            sb.append("**发现问题**: ").append(summary.getTotalIssues()).append(" 个\n");
-            if (summary.getCriticalIssues() > 0) {
-                sb.append("- 🔴 严重: ").append(summary.getCriticalIssues()).append("\n");
-            }
-            if (summary.getHighIssues() > 0) {
-                sb.append("- 🟠 高危: ").append(summary.getHighIssues()).append("\n");
-            }
-            if (summary.getMediumIssues() > 0) {
-                sb.append("- 🟡 中危: ").append(summary.getMediumIssues()).append("\n");
-            }
-            if (summary.getLowIssues() > 0) {
-                sb.append("- 🟢 低危: ").append(summary.getLowIssues()).append("\n");
-            }
-        } else {
-            sb.append("✅ 未发现明显问题\n");
-        }
 
         return sb.toString();
     }

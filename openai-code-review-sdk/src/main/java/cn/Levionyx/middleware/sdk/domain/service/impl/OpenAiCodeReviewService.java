@@ -6,6 +6,7 @@ import cn.Levionyx.middleware.sdk.domain.service.AbstractOpenAiCodeReviewService
 import cn.Levionyx.middleware.sdk.infrastructure.feishu.FeiShu;
 import cn.Levionyx.middleware.sdk.infrastructure.git.GitCommand;
 import cn.Levionyx.middleware.sdk.infrastructure.notification.INotification;
+import cn.Levionyx.middleware.sdk.infrastructure.notification.NotificationContentFormatter;
 import cn.Levionyx.middleware.sdk.infrastructure.rag.IRAGService;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
 
     @Override
     protected void pushMessage(String logUrl, CodeReviewResult result) throws Exception {
-        String summary = formatShortSummary(result);
+        String summary = NotificationContentFormatter.formatReviewSummary(result);
 
         // 使用新的通知接口
         if (notification != null) {
@@ -160,33 +161,4 @@ public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
         return sb.toString();
     }
 
-    /**
-     * 格式化简短摘要（用于飞书卡片）
-     */
-    private String formatShortSummary(CodeReviewResult result) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("**质量评分**: ").append(result.getQualityScore()).append("/100\n\n");
-
-        CodeReviewResult.Summary summary = result.getSummary();
-        if (summary.getTotalIssues() > 0) {
-            sb.append("**发现问题**: ").append(summary.getTotalIssues()).append(" 个\n");
-            if (summary.getCriticalIssues() > 0) {
-                sb.append("- 🔴 严重: ").append(summary.getCriticalIssues()).append("\n");
-            }
-            if (summary.getHighIssues() > 0) {
-                sb.append("- 🟠 高危: ").append(summary.getHighIssues()).append("\n");
-            }
-            if (summary.getMediumIssues() > 0) {
-                sb.append("- 🟡 中危: ").append(summary.getMediumIssues()).append("\n");
-            }
-            if (summary.getLowIssues() > 0) {
-                sb.append("- 🟢 低危: ").append(summary.getLowIssues()).append("\n");
-            }
-        } else {
-            sb.append("✅ 未发现明显问题\n");
-        }
-
-        return sb.toString();
-    }
 }
